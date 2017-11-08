@@ -47,7 +47,7 @@
             requestLogin(params).then(data => {
               if (data.resultCode === '000000') {
                 sessionStorage.setItem('user', JSON.stringify(data))
-                this.$router.push({ path: '/home' })
+                this.$router.push({ path: '/home/grid' })
               } else {
                 this.$message.error(data.resultInfo)
               }
