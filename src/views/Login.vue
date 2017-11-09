@@ -13,6 +13,11 @@
       <el-button @click="resetForm('loginForm')">重置</el-button>
     </el-form-item>
   </el-form>
+    <!--<div>-->
+      <!--<p>{{count}}</p>-->
+      <!--<button @click="increment">+</button>-->
+      <!--<button @click="decrement">-</button>-->
+    <!--</div>-->
   </div>
 </template>
 
@@ -36,6 +41,11 @@
         }
       }
     },
+    computed: {
+      count: function () {
+        return this.$store.state.count
+      }
+    },
     methods: {
       submitForm (formName) {
         this.$refs[formName].validate((valid) => {
@@ -47,7 +57,7 @@
             requestLogin(params).then(data => {
               if (data.resultCode === '000000') {
                 sessionStorage.setItem('user', JSON.stringify(data))
-                this.$router.push({ path: '/home/grid' })
+                this.$router.push({ path: '/grid' })
               } else {
                 this.$message.error(data.resultInfo)
               }
@@ -60,6 +70,12 @@
       },
       resetForm (formName) {
         this.$refs[formName].resetFields()
+      },
+      increment () {
+        this.$store.commit('increment')
+      },
+      decrement () {
+        this.$store.commit('decrement')
       }
     }
   }

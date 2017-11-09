@@ -5,7 +5,8 @@ import ElementUI from 'element-ui'
 import './styles/base.css'
 import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
-import router from './router'
+import router from './router/index'
+import store from './vuex/index'
 import Mock from './mock/index'
 
 Mock.bootstrap()
@@ -31,6 +32,7 @@ router.beforeEach((to, from, next) => {
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })

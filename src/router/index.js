@@ -11,7 +11,7 @@ Vue.use(VueRouter)
 export default new VueRouter({
   routes: [
     {
-      path: '/login', name: 'login', component: Login
+      path: '/login', name: 'login', iconCls: 'el-icon-message', component: Login, hidden: true
     },
     // {
     //   path: '/home',
@@ -19,12 +19,13 @@ export default new VueRouter({
     //   component: Home
     // },
     {
-      path: '/home',
+      path: '/',
       name: 'home',
+      iconCls: 'el-icon-menu',
       component: Home,
       children: [
-        {path: 'grid', component: grid},
-        {path: 'form', component: form}
+        {path: 'grid', name: 'grid', iconCls: 'el-icon-message', component: grid},
+        {path: 'form', name: 'form', iconCls: 'el-icon-setting', component: form}
       ]
     }
   ]
