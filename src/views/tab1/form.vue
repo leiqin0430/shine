@@ -3,7 +3,7 @@
 </template>
 <script>
   export default {
-    name: 'form',
+//    name: 'form',
     data () {
       return {
         msg: 'Welcome to form tab!'

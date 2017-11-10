@@ -1,11 +1,11 @@
 <template>
-  <el-container style="border: 1px solid #eee">
+  <el-container style="height:100%;">
     <el-header>
       <h2 style="float: left;line-height: 60px;">系统名称</h2>
       <div style="float: right;line-height: 60px;">
         <el-dropdown @command="handleCommand">
           <span class="el-dropdown-link">
-            <i class="el-icon-setting" style="margin-right: 5px"></i><span>{{ userName }}</span>
+            <i class="el-icon-setting" style="margin-right: 5px"></i><span>{{userName}}</span>
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="message">消息中心</el-dropdown-item>
@@ -18,47 +18,18 @@
     <el-container>
       <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
         <el-menu :default-active="'/grid'" router>
-          <!--<el-submenu index="1">-->
-            <!--<template slot="title"><i class="el-icon-message"></i>导航一</template>-->
-            <!--<el-menu-item index="/grid">选项1</el-menu-item>-->
-            <!--<el-menu-item index="/form">选项2</el-menu-item>-->
-            <!--<el-menu-item index="1-3">选项3</el-menu-item>-->
-            <!--<el-menu-item index="1-4">选项4</el-menu-item>-->
-          <!--</el-submenu>-->
-          <!--<el-submenu index="2">-->
-            <!--<template slot="title"><i class="el-icon-menu"></i>导航二</template>-->
-            <!--<el-menu-item index="2-1">选项1</el-menu-item>-->
-            <!--<el-menu-item index="2-2">选项2</el-menu-item>-->
-          <!--</el-submenu>-->
-          <!--<el-submenu index="3">-->
-            <!--<template slot="title"><i class="el-icon-setting"></i>导航三</template>-->
-            <!--<el-menu-item index="3-1">选项1</el-menu-item>-->
-            <!--<el-menu-item index="3-2">选项2</el-menu-item>-->
-          <!--</el-submenu>-->
           <template v-for="(item, index1) in $router.options.routes" v-if="!item.hidden">
             <el-submenu v-if="item.children" :index="item.path" :key="index1">
               <template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
-              <template v-for="(child, index2) in item.children">
-                <el-menu-item :index="item.path+child.path" :key="index1+'-'+index2"><i :class="child.iconCls"></i>{{child.name}}</el-menu-item>
-              </template>
+              <el-menu-item v-for="(child, index2) in item.children" v-if="!child.hidden" :index="item.path+child.path" :key="index1+'-'+index2">
+                <i :class="child.iconCls"></i>{{child.name}}
+              </el-menu-item>
             </el-submenu>
             <el-menu-item v-else :index="item.path" :key="index1"><i :class="item.iconCls"></i>{{item.name}}</el-menu-item>
           </template>
         </el-menu>
       </el-aside>
       <el-main>
-        <!--<el-table :data="tableData">-->
-          <!--<el-table-column prop="name" label="姓名" width="140">-->
-          <!--</el-table-column>-->
-          <!--<el-table-column prop="age" label="年龄" width="120">-->
-          <!--</el-table-column>-->
-          <!--<el-table-column prop="date" label="出生日期" width="140">-->
-          <!--</el-table-column>-->
-          <!--<el-table-column prop="address" label="地址">-->
-          <!--</el-table-column>-->
-          <!--<el-table-column prop="telephone" label="电话">-->
-          <!--</el-table-column>-->
-        <!--</el-table>-->
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -68,18 +39,10 @@
 <script>
   import base from '../api/base'
   export default {
-    name: 'home',
+//    name: 'home',
     data () {
-      const item = {
-        name: '王小虎',
-        age: 25,
-        date: '1992-05-02',
-        address: '上海市普陀区金沙江路 1518 弄',
-        telephone: '18700571926'
-      }
       return {
-        userName: base.getUserName(),
-        tableData: Array(10).fill(item)
+        userName: base.getUserName()
       }
     },
     methods: {

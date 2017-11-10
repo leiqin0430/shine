@@ -13,19 +13,14 @@ export default new VueRouter({
     {
       path: '/login', name: 'login', iconCls: 'el-icon-message', component: Login, hidden: true
     },
-    // {
-    //   path: '/home',
-    //   name: 'home',
-    //   component: Home
-    // },
     {
       path: '/',
-      name: 'home',
+      name: '菜单一',
       iconCls: 'el-icon-menu',
       component: Home,
       children: [
-        {path: 'grid', name: 'grid', iconCls: 'el-icon-message', component: grid},
-        {path: 'form', name: 'form', iconCls: 'el-icon-setting', component: form}
+        {path: 'grid', name: 'Table 表格', iconCls: 'el-icon-message', component: grid},
+        {path: 'form', name: 'Form 表单', iconCls: 'el-icon-setting', component: form}
       ]
     }
   ]
