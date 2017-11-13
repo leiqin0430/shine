@@ -22,7 +22,8 @@ const paramsHandle = function (params) {
  * 返回当前登录者姓名
  */
 const getUserName = function () {
-  return JSON.parse(sessionStorage.getItem('user')).user.name
+  // return JSON.parse(localStorage.getItem('user')).user.name
+  return 'admin'
 }
 
 export default {

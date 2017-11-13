@@ -7,9 +7,9 @@ import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
 import router from './router/index'
 import store from './vuex/index'
-import Mock from './mock/index'
-
-Mock.bootstrap()
+// import Mock from './mock/index'
+//
+// Mock.bootstrap()
 
 Vue.config.productionTip = false
 
@@ -18,9 +18,9 @@ Vue.use(ElementUI)
 router.beforeEach((to, from, next) => {
   // ...
   if (to.path === '/login') {
-    sessionStorage.removeItem('user')
+    localStorage.removeItem('user')
   }
-  let user = JSON.parse(sessionStorage.getItem('user'))
+  let user = JSON.parse(localStorage.getItem('user'))
   if (!user && to.path !== '/login') {
     next({ path: '/login' })
   } else {

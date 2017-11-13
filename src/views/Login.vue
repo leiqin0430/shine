@@ -22,7 +22,9 @@
 </template>
 
 <script>
-  import { requestLogin } from '../api/api'
+  import common from '../utils/common'
+//  import { requestLogin } from '../api/api'
+  import { requestLogin } from '../api/login'
   export default {
     name: 'login',
     data () {
@@ -55,8 +57,10 @@
 //            params.append('password', this.loginForm.pass)
             let params = {'accountNo': this.loginForm.account, 'password': this.loginForm.pass}
             requestLogin(params).then(data => {
-              if (data.resultCode === '000000') {
-                sessionStorage.setItem('user', JSON.stringify(data))
+              if (data.resultCode === common.respResult.RESPONSE_SUCCESS) {
+                data.token = 'test1234'
+                localStorage.setItem('user', JSON.stringify(data))
+                this.$store.commit('setToken', data.token)
                 this.$router.push({ path: '/grid' })
               } else {
                 this.$message.error(data.resultInfo)
