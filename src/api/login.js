@@ -1,9 +1,10 @@
 import fetch from '@/utils/fetch'
 
-export const requestLogin = params => {
+export const requestLogin = function (params, fn) {
   return fetch({
     url: '/log/in',
     method: 'post',
-    data: params
-  }).then(resp => resp.data)
+    params: params
+    // success: fn
+  }, fn)
 }

@@ -56,7 +56,8 @@
 //            params.append('accountNo', this.loginForm.account)
 //            params.append('password', this.loginForm.pass)
             let params = {'accountNo': this.loginForm.account, 'password': this.loginForm.pass}
-            requestLogin(params).then(data => {
+//            requestLogin(params).then(data => {
+            requestLogin(params, function (data) {
               if (data.resultCode === common.respResult.RESPONSE_SUCCESS) {
                 data.token = 'test1234'
                 localStorage.setItem('user', JSON.stringify(data))

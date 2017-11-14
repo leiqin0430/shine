@@ -69,7 +69,14 @@
     methods: {
       fetchData () {
 //        let params = {page: 1, rows: 10}
-        getBorrowList(this.formInline).then(resp => {
+//        getBorrowList(this.formInline).then(resp => {
+//          if (resp.resultCode === common.respResult.RESPONSE_SUCCESS) {
+//            this.tableData = resp.page.rows
+//          } else {
+//            this.$message.error(resp.resultInfo)
+//          }
+//        })
+        getBorrowList(this.formInline, function (resp) {
           if (resp.resultCode === common.respResult.RESPONSE_SUCCESS) {
             this.tableData = resp.page.rows
           } else {
