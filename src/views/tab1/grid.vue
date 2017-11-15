@@ -35,7 +35,7 @@
   <!--</el-container>-->
 </template>
 <script>
-  import common from '../../utils/common'
+//  import common from '../../utils/common'
   import { getBorrowList } from '../../api/grid'
   export default {
 //    name: 'grid',
@@ -68,20 +68,11 @@
     },
     methods: {
       fetchData () {
-//        let params = {page: 1, rows: 10}
-//        getBorrowList(this.formInline).then(resp => {
-//          if (resp.resultCode === common.respResult.RESPONSE_SUCCESS) {
-//            this.tableData = resp.page.rows
-//          } else {
-//            this.$message.error(resp.resultInfo)
-//          }
-//        })
-        getBorrowList(this.formInline, function (resp) {
-          if (resp.resultCode === common.respResult.RESPONSE_SUCCESS) {
-            this.tableData = resp.page.rows
-          } else {
-            this.$message.error(resp.resultInfo)
-          }
+        let me = this
+        getBorrowList(this.formInline, function (data) {
+          me.tableData = data.page.rows
+        }, function (data) {
+          alert('自行处理错误')
         })
       },
       onSubmit () {

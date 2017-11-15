@@ -22,8 +22,7 @@
 </template>
 
 <script>
-  import common from '../utils/common'
-//  import { requestLogin } from '../api/api'
+//  import common from '../utils/common'
   import { requestLogin } from '../api/login'
   export default {
     name: 'login',
@@ -50,22 +49,15 @@
     },
     methods: {
       submitForm (formName) {
+        let me = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
-//            let params = new URLSearchParams()
-//            params.append('accountNo', this.loginForm.account)
-//            params.append('password', this.loginForm.pass)
             let params = {'accountNo': this.loginForm.account, 'password': this.loginForm.pass}
-//            requestLogin(params).then(data => {
             requestLogin(params, function (data) {
-              if (data.resultCode === common.respResult.RESPONSE_SUCCESS) {
-                data.token = 'test1234'
-                localStorage.setItem('user', JSON.stringify(data))
-                this.$store.commit('setToken', data.token)
-                this.$router.push({ path: '/grid' })
-              } else {
-                this.$message.error(data.resultInfo)
-              }
+              data.token = 'test1234'
+              localStorage.setItem('user', JSON.stringify(data))
+              me.$store.commit('setToken', data.token)
+              me.$router.push({ path: '/grid' })
             })
           } else {
             this.$message.error('表单提交失败')

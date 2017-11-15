@@ -34,6 +34,7 @@ module.exports = {
     // proxyTable: {},
     proxyTable: {
       '/api': {
+        // target: 'http://192.168.20.20:9091/bagl',//server
         // target: 'http://192.168.20.20:9092/bagl',//server
         target: 'http://192.168.30.116:8080',//local
         changeOrigin: true,
