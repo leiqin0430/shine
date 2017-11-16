@@ -11,9 +11,13 @@ Vue.use(VueRouter)
 
 const Login = () => import('@/views/Login')
 const Err404 = () => import('@/views/Err404')
-const Home = () => import('@/views/Home')
-const grid = () => import('@/views/tab1/grid')
-const form = () => import('@/views/tab1/form')
+// const Home = () => import('@/views/Home')
+// const grid = () => import('@/views/tab1/grid')
+// const form = () => import('@/views/tab1/form')
+
+const Home = () => import(/* webpackChunkName: "group-foo" */ '@/views/Home')
+const grid = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/grid')
+const form = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/form')
 
 export default new VueRouter({
   routes: [
