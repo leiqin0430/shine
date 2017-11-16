@@ -1,13 +1,19 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 // import Hello from '@/components/Hello'
-import Login from '@/views/Login'
-import Err404 from '@/views/Err404'
-import Home from '@/views/Home'
-import grid from '@/views/tab1/grid'
-import form from '@/views/tab1/form'
+// import Login from '@/views/Login'
+// import Err404 from '@/views/Err404'
+// import Home from '@/views/Home'
+// import grid from '@/views/tab1/grid'
+// import form from '@/views/tab1/form'
 
 Vue.use(VueRouter)
+
+const Login = () => import('@/views/Login')
+const Err404 = () => import('@/views/Err404')
+const Home = () => import('@/views/Home')
+const grid = () => import('@/views/tab1/grid')
+const form = () => import('@/views/tab1/form')
 
 export default new VueRouter({
   routes: [

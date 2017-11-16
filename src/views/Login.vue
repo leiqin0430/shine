@@ -22,8 +22,7 @@
 </template>
 
 <script>
-//  import common from '../utils/common'
-  import { requestLogin } from '../api/login'
+  import { login } from '../api/login'
   export default {
     name: 'login',
     data () {
@@ -53,7 +52,7 @@
         this.$refs[formName].validate((valid) => {
           if (valid) {
             let params = {'accountNo': this.loginForm.account, 'password': this.loginForm.pass}
-            requestLogin(params, function (data) {
+            login(params, function (data) {
               data.token = 'test1234'
               localStorage.setItem('user', JSON.stringify(data))
               me.$store.commit('setToken', data.token)

@@ -58,11 +58,11 @@ axios.interceptors.response.use(function (response) {
  * @param cfg
  * @returns {Promise.<TResult>}
  */
-const fetch = cfg => {
+const shineHttp = cfg => {
   let config = {
 
     // 默认'get'请求
-    method: cfg.method ? cfg.method : 'get',
+    method: cfg.method,
 
     // 基础请求路径
     baseURL: process.env.BASE_URL,
@@ -86,11 +86,11 @@ const fetch = cfg => {
     headers: {'X-Requested-With': 'XMLHttpRequest'}
   }
 
-  if (config.method.toLowerCase() === 'get') {
+  if (config.method === 'get') {
     if (cfg.params) {
       config.params = cfg.params
     }
-  } else if (config.method.toLowerCase() === 'post') {
+  } else if (config.method === 'post') {
     if (cfg.params) {
       config.data = qs.stringify(cfg.params)
     }
@@ -161,4 +161,4 @@ const checkStatus = resp => {
   }
 }
 
-export default fetch
+export default shineHttp

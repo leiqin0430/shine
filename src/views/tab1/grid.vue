@@ -35,25 +35,9 @@
   <!--</el-container>-->
 </template>
 <script>
-//  import common from '../../utils/common'
   import { getBorrowList } from '../../api/grid'
   export default {
-//    name: 'grid',
     data () {
-//      const item = {
-//        name: '王小虎',
-//        age: 25,
-//        date: '1992-05-02',
-//        address: '上海市普陀区金沙江路 1518 弄',
-//        telephone: '18700571926'
-//      }
-//      return {
-//        tableData: Array(20).fill(item),
-//        formInline: {
-//          user: '',
-//          region: ''
-//        }
-//      }
       return {
         tableData: [],
         formInline: {
