@@ -19,6 +19,10 @@ const Home = () => import(/* webpackChunkName: "group-foo" */ '@/views/Home')
 const grid = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/grid')
 const form = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/form')
 
+const scss = () => import('@/views/tab2/scss')
+
+const echarts = () => import('@/views/charts/echarts')
+
 export default new VueRouter({
   routes: [
     { path: '/login', name: 'login', iconCls: 'el-icon-message', component: Login, hidden: true },
@@ -31,6 +35,24 @@ export default new VueRouter({
       children: [
         {path: 'grid', name: 'Table 表格', iconCls: 'el-icon-message', component: grid},
         {path: 'form', name: 'Form 表单', iconCls: 'el-icon-setting', component: form}
+      ]
+    },
+    {
+      path: '/',
+      name: '菜单二',
+      iconCls: 'el-icon-menu',
+      component: Home,
+      children: [
+        {path: 'scss', name: 'scss', iconCls: 'el-icon-picture-outline', component: scss}
+      ]
+    },
+    {
+      path: '/',
+      name: 'Charts',
+      iconCls: 'el-icon-menu',
+      component: Home,
+      children: [
+        {path: 'echarts', name: 'echarts', iconCls: 'el-icon-picture-outline', component: echarts}
       ]
     }
   ]

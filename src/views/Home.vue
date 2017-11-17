@@ -16,7 +16,7 @@
       </div>
     </el-header>
     <el-container>
-      <el-aside style="background-color: rgb(238, 241, 246)">
+      <el-aside style="background-color: #eef1f6;">
         <el-menu :default-active="'/grid'" router>
           <template v-for="(item, index1) in $router.options.routes" v-if="!item.hidden">
             <el-submenu v-if="item.children" :index="item.path" :key="index1">

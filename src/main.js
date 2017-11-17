@@ -13,12 +13,11 @@ import store from './vuex/index'
 
 Vue.config.productionTip = false
 
-Vue.config.errorHandler = function (err, vm, info) {
-  // handle error
-  // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
-  // 只在 2.2.0+ 可用
-  console.log(err)
-}
+Vue.component('child', {
+  // 在 JavaScript 中使用 camelCase
+  props: ['myMessage'],
+  template: '<span>{{ myMessage }}</span>'
+})
 
 // Vue.use(ElementUI)
 Vue.use(ElementUI, { size: 'small' })

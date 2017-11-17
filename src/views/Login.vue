@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <h2 class="title">系统登录</h2>
-  <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-width="100px" class="login-ruleForm">
+  <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-width="50px" class="login-ruleForm">
     <el-form-item label="账号" prop="account">
       <el-input type="text" v-model="loginForm.account" auto-complete="off"></el-input>
     </el-form-item>
@@ -9,8 +9,8 @@
       <el-input type="password" v-model="loginForm.pass" auto-complete="off"></el-input>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
-      <el-button @click="resetForm('loginForm')">重置</el-button>
+      <el-button type="primary" @click="submitForm('loginForm')" style="width: 100%;">登录</el-button>
+      <!--<el-button @click="resetForm('loginForm')">重置</el-button>-->
     </el-form-item>
   </el-form>
     <!--<div>-->
@@ -85,9 +85,9 @@
   }
   .login-container {
     min-width: 300px;
-    max-width: 500px;
+    max-width: 350px;
     margin: 200px auto 0px auto;
-    padding: 42px 20px 20px 20px;
+    padding: 42px 40px 40px 40px;
     border: 1px solid #ddd;
     border-radius: 5px;
   }
