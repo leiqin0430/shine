@@ -32,6 +32,7 @@ export default new VueRouter({
       name: '菜单一',
       iconCls: 'el-icon-menu',
       component: Home,
+      groupName: 'settings',
       children: [
         {path: 'grid', name: 'Table 表格', iconCls: 'el-icon-message', component: grid},
         {path: 'form', name: 'Form 表单', iconCls: 'el-icon-setting', component: form}
@@ -42,6 +43,7 @@ export default new VueRouter({
       name: '菜单二',
       iconCls: 'el-icon-menu',
       component: Home,
+      groupName: 'settings',
       children: [
         {path: 'scss', name: 'scss', iconCls: 'el-icon-picture-outline', component: scss}
       ]
@@ -51,6 +53,7 @@ export default new VueRouter({
       name: 'Charts',
       iconCls: 'el-icon-menu',
       component: Home,
+      groupName: 'processing',
       children: [
         {path: 'echarts', name: 'echarts', iconCls: 'el-icon-picture-outline', component: echarts}
       ]

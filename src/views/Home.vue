@@ -1,8 +1,22 @@
 <template>
   <el-container style="height:100%;">
     <el-header>
-      <h2 style="float: left;line-height: 60px;">系统名称</h2>
-      <div style="float: right;line-height: 60px;">
+      <h2 class="sysName">欣阳科技后台管理系统</h2>
+      <el-menu
+        :default-active="topActiveIndex"
+        class="el-menu-top"
+        mode="horizontal"
+        @select="handleSelect"
+        ref="topMenu"
+        background-color="#545c64"
+        text-color="#fff"
+        active-text-color="#ffd04b">
+        <el-menu-item index="settings">系统设置</el-menu-item>
+        <el-menu-item index="processing">处理中心</el-menu-item>
+        <el-menu-item index="3">我的工作台</el-menu-item>
+        <el-menu-item index="4">订单管理</el-menu-item>
+      </el-menu>
+      <div class="sysUser">
         <el-dropdown @command="handleCommand">
           <span class="el-dropdown-link">
             <i class="el-icon-setting" style="margin-right: 5px"></i><span>{{userName}}</span>
@@ -17,9 +31,9 @@
     </el-header>
     <el-container>
       <el-aside style="background-color: #eef1f6;">
-        <el-menu :default-active="'/grid'" router>
-          <template v-for="(item, index1) in $router.options.routes" v-if="!item.hidden">
-            <el-submenu v-if="item.children" :index="item.path" :key="index1">
+        <el-menu :default-active="leftActiveIndex" :active="leftActiveIndex" ref="leftMenu" router>
+          <template v-for="(item, index1) in routesArr" v-if="!item.hidden">
+            <el-submenu v-if="item.children" :index="item.path+index1" :key="index1">
               <template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
               <el-menu-item v-for="(child, index2) in item.children" v-if="!child.hidden" :index="item.path+child.path" :key="index1+'-'+index2">
                 <i :class="child.iconCls"></i>{{child.name}}
@@ -42,10 +56,38 @@
 //    name: 'home',
     data () {
       return {
-        userName: common.getUserName()
+        userName: common.getUserName(),
+        topActiveIndex: 'settings',
+        leftActiveIndex: '',
+        routesArr: []
       }
     },
+    created () {
+      this.handleSelect('settings')
+    },
     methods: {
+      handleSelect (key, keyPath) {
+        console.log(key, keyPath)
+        console.log(this.$router.options.routes)
+        console.log(this.$refs)
+        let routes = this.$router.options.routes
+        this.routesArr.splice(0)
+        for (let i in routes) {
+          if (routes[i].groupName && routes[i].groupName === key) {
+            this.routesArr.push(routes[i])
+          }
+        }
+        if (this.routesArr.length > 0) {
+          if (this.routesArr[0].children) {
+            this.$refs['leftMenu'].open(this.routesArr[0].path + '0')
+            this.leftActiveIndex = this.routesArr[0].path + this.routesArr[0].children[0].path
+            this.$router.push({ path: this.routesArr[0].path + this.routesArr[0].children[0].path })
+          } else {
+            this.leftActiveIndex = this.routesArr[0].path
+            this.$router.push({ path: this.routesArr[0].path })
+          }
+        }
+      },
       handleCommand (command) {
         switch (command) {
           case 'message':
@@ -81,19 +123,32 @@
   }
 </script>
 
-<style>
+<style lang="scss" scoped>
   .el-header {
-    background-color: #B3C0D1;
-    color: #333;
+    background-color: #545c64;
+    color: #fff;
     line-height: 60px;
   }
-
+  .sysName {
+    float: left;
+    width: 280px;
+  }
+  .el-menu-top {
+    float: left;
+    width: calc(100% - 280px - 60px);
+    background-color: #545c64;
+  }
+  .sysUser {
+    float: right;
+    width: 60px;
+    text-align: right;
+    .el-dropdown-link {
+      cursor: pointer;
+      color: #409EFF;
+    }
+  }
   .el-aside {
     color: #333;
   }
 
-  .el-dropdown-link {
-    cursor: pointer;
-    color: #409EFF;
-  }
 </style>

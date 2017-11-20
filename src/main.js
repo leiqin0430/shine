@@ -25,14 +25,14 @@ Vue.use(ElementUI, { size: 'small' })
 router.beforeEach((to, from, next) => {
   // ...
   if (to.path === '/login') {
-    localStorage.removeItem('user')
+    // localStorage.removeItem('user')
   }
-  let user = JSON.parse(localStorage.getItem('user'))
-  if (!user && to.path !== '/login') {
-    next({ path: '/login' })
-  } else {
-    next()
-  }
+  // let user = JSON.parse(localStorage.getItem('user'))
+  // if (!user && to.path !== '/login') {
+  //   next({ path: '/login' })
+  // } else {
+  next()
+  // }
 })
 
 /* eslint-disable no-new */
