@@ -1,11 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import Hello from '@/components/Hello'
-// import Login from '@/views/Login'
-// import Err404 from '@/views/Err404'
-// import Home from '@/views/Home'
-// import grid from '@/views/tab1/grid'
-// import form from '@/views/tab1/form'
 
 Vue.use(VueRouter)
 
@@ -23,16 +17,28 @@ const scss = () => import('@/views/tab2/scss')
 
 const echarts = () => import('@/views/charts/echarts')
 
+const menu = () => import('@/views/settings/menu')
+
 export default new VueRouter({
   routes: [
     { path: '/login', name: 'login', iconCls: 'el-icon-message', component: Login, hidden: true },
     { path: '/404', component: Err404, hidden: true },
     {
       path: '/',
-      name: '菜单一',
+      name: '系统设置',
       iconCls: 'el-icon-menu',
       component: Home,
       groupName: 'settings',
+      children: [
+        {path: 'menu', name: '菜单管理', iconCls: 'el-icon-message', component: menu}
+      ]
+    },
+    {
+      path: '/',
+      name: '菜单一',
+      iconCls: 'el-icon-menu',
+      component: Home,
+      groupName: 'processing',
       children: [
         {path: 'grid', name: 'Table 表格', iconCls: 'el-icon-message', component: grid},
         {path: 'form', name: 'Form 表单', iconCls: 'el-icon-setting', component: form}
@@ -43,7 +49,7 @@ export default new VueRouter({
       name: '菜单二',
       iconCls: 'el-icon-menu',
       component: Home,
-      groupName: 'settings',
+      groupName: 'processing',
       children: [
         {path: 'scss', name: 'scss', iconCls: 'el-icon-picture-outline', component: scss}
       ]

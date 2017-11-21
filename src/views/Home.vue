@@ -6,7 +6,7 @@
         :default-active="topActiveIndex"
         class="el-menu-top"
         mode="horizontal"
-        @select="handleSelect"
+        @select="topHandleSelect"
         ref="topMenu"
         background-color="#545c64"
         text-color="#fff"
@@ -31,7 +31,7 @@
     </el-header>
     <el-container>
       <el-aside style="background-color: #eef1f6;">
-        <el-menu :default-active="leftActiveIndex" :active="leftActiveIndex" ref="leftMenu" router>
+        <el-menu :default-active="leftActiveIndex" @select="leftHandleSelect" ref="leftMenu">
           <template v-for="(item, index1) in routesArr" v-if="!item.hidden">
             <el-submenu v-if="item.children" :index="item.path+index1" :key="index1">
               <template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
@@ -63,13 +63,12 @@
       }
     },
     created () {
-      this.handleSelect('settings')
+      this.topHandleSelect('settings')
     },
     methods: {
-      handleSelect (key, keyPath) {
-        console.log(key, keyPath)
-        console.log(this.$router.options.routes)
-        console.log(this.$refs)
+      topHandleSelect (key) {
+//        console.log(this.$router.options.routes)
+//        console.log(this.$refs)
         let routes = this.$router.options.routes
         this.routesArr.splice(0)
         for (let i in routes) {
@@ -79,14 +78,20 @@
         }
         if (this.routesArr.length > 0) {
           if (this.routesArr[0].children) {
-            this.$refs['leftMenu'].open(this.routesArr[0].path + '0')
-            this.leftActiveIndex = this.routesArr[0].path + this.routesArr[0].children[0].path
-            this.$router.push({ path: this.routesArr[0].path + this.routesArr[0].children[0].path })
+//            this.$refs['leftMenu'].open(this.routesArr[0].path + '0')
+//            this.leftActiveIndex = this.routesArr[0].path + this.routesArr[0].children[0].path
+//            this.$router.push({ path: this.routesArr[0].path + this.routesArr[0].children[0].path })
+            this.leftHandleSelect(this.routesArr[0].path + this.routesArr[0].children[0].path)
           } else {
-            this.leftActiveIndex = this.routesArr[0].path
-            this.$router.push({ path: this.routesArr[0].path })
+//            this.leftActiveIndex = this.routesArr[0].path
+//            this.$router.push({ path: this.routesArr[0].path })
+            this.leftHandleSelect(this.routesArr[0].path)
           }
         }
+      },
+      leftHandleSelect (key) {
+        this.leftActiveIndex = key
+        this.$router.push({path: key})
       },
       handleCommand (command) {
         switch (command) {
@@ -150,5 +155,4 @@
   .el-aside {
     color: #333;
   }
-
 </style>
