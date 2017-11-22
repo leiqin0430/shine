@@ -53,9 +53,10 @@
       </el-form>
       <!--选择图标Dialog-->
       <el-dialog
-        width="40%"
+        width="45%"
         title="选择图标"
         :visible.sync="innerIconVisible"
+        :close-on-click-modal="false"
         append-to-body>
         <icons></icons>
         <div slot="footer" class="dialog-footer">
