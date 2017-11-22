@@ -7,6 +7,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
 import router from './router/index'
 import store from './vuex/index'
+import 'font-awesome/css/font-awesome.min.css'
 // import Mock from './mock/index'
 //
 // Mock.bootstrap()
