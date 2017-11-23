@@ -30,8 +30,8 @@
       </el-form-item>
         <el-form-item label="图标" :label-width="formLabelWidth">
           <span :class="'fa fa-'+form.icon"></span>
-          <span>{{form.icon}}</span>
-          <el-button @click="innerIconVisible = true">选择</el-button>
+          <span>{{form.icon ? form.icon : '无'}}</span>
+          <el-button @click="tempIcon = form.icon; innerIconVisible = true">选择</el-button>
         </el-form-item>
         <el-form-item label="排序" :label-width="formLabelWidth">
           <el-input-number v-model="form.order" controls-position="right" :min="1" :max="1000"></el-input-number>
@@ -58,10 +58,10 @@
         :visible.sync="innerIconVisible"
         :close-on-click-modal="false"
         append-to-body>
-        <icons></icons>
+        <icons :has-selected="tempIcon" @watchIconsDialog="getSelectedIcon"></icons>
         <div slot="footer" class="dialog-footer">
           <el-button @click="innerIconVisible = false">取 消</el-button>
-          <el-button type="primary" @click="innerIconVisible = false">确 定</el-button>
+          <el-button type="primary" @click="form.icon = tempIcon; innerIconVisible = false">确 定</el-button>
         </div>
       </el-dialog>
       <div slot="footer" class="dialog-footer">
@@ -81,18 +81,21 @@
           id: '1',
           label: '一级 1',
           url: '',
+          icon: 'address-book',
           order: 1,
           visible: '1',
           children: [{
             id: '4',
             label: '二级 1-1',
             url: '',
+            icon: 'address-book-o',
             order: 1,
             visible: '1',
             children: [{
               id: '9',
               label: '三级 1-1-1',
               url: '/sys/user/info',
+              icon: 'address-book',
               order: 1,
               visible: '1',
               children: []
@@ -102,12 +105,14 @@
           id: '2',
           label: '一级 2',
           url: '',
+          icon: '',
           order: 2,
           visible: '0',
           children: [{
             id: '5',
             label: '二级 2-1',
             url: '/sys/user/info',
+            icon: 'address-book-o',
             order: 1,
             visible: '0',
             children: []
@@ -126,12 +131,13 @@
           id: null,
           label: '',
           url: '',
-          icon: 'camera-retro',
+          icon: '',
           order: -1,
           visible: '',
           remark: ''
         },
-        formLabelWidth: '100px'
+        formLabelWidth: '100px',
+        tempIcon: ''
       }
     },
     components: { icons },
@@ -154,9 +160,9 @@
             h('el-button', {attrs: {size: 'mini', type: 'text'},
               on: {
                 click: function (event) {
-                  console.log('data', data)
-                  console.log('node', node)
-                  console.log('store', store)
+//                  console.log('data', data)
+//                  console.log('node', node)
+//                  console.log('store', store)
                   me.dialogFormVisible = true
                   me.dialogTitle = '修改菜单'
                   me.form.parentLabel = node.parent.data.label
@@ -164,6 +170,7 @@
                   me.form.id = data.id
                   me.form.label = data.label
                   me.form.url = data.url
+                  me.form.icon = data.icon
                   me.form.order = data.order
                   me.form.visible = data.visible
                   me.form.remark = data.remark
@@ -173,7 +180,24 @@
             h('el-button', {attrs: {size: 'mini', type: 'text'},
               on: {
                 click: function (event) {
-                  store.remove(data)
+                  console.log('data', data)
+//                  store.remove(data)
+                  let msg = (data.children.length > 0) ? '你确定要删除该菜单及其子菜单吗?' : '你确定要删除该菜单吗?'
+                  me.$confirm(msg, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                  }).then(() => {
+                    me.$message({
+                      type: 'success',
+                      message: '删除成功!'
+                    })
+                  }).catch(() => {
+                    me.$message({
+                      type: 'info',
+                      message: '已取消删除'
+                    })
+                  })
                   event.stopPropagation()
                 }
               }}, '删除'),
@@ -188,6 +212,7 @@
                   me.form.id = null
                   me.form.label = ''
                   me.form.url = ''
+                  me.form.icon = ''
                   me.form.order = 1
                   me.form.visible = '1'
                   me.form.remark = ''
@@ -196,6 +221,9 @@
               }}, '添加下级菜单')
           ])
         ])
+      },
+      getSelectedIcon (data) {
+        this.tempIcon = data
       }
     }
   }

@@ -2,14 +2,14 @@
   <div class="icons">
     <template v-for="icon in icons">
       <h2 class="page-header">{{icon.type}}</h2>
-      <el-row :gutter="10" class="icon-row" v-for="count in (Math.floor(icon.items.length / 4))">
-        <el-col :span="6" v-for="item in icon.items.slice((count-1)*4,count*4)">
-          <span class="icon-item"><span :class="'fa fa-'+item"></span>{{item}}</span>
+      <el-row :gutter="10" class="icon-row" v-for="count in (Math.floor(icon.items.length / countInRow))" :key="icon.type+count">
+        <el-col :span="6" v-for="item in icon.items.slice((count-1)*countInRow,count*countInRow)" :key="item">
+          <span class="icon-item" :class="{selected: hasSelected===item}" @click="selectIcon(item)"><span :class="'fa fa-'+item"></span>{{item}}</span>
         </el-col>
       </el-row>
-      <el-row :gutter="10" class="icon-row" v-if="(icon.items.length % 4) !== 0">
-        <el-col :span="6" v-for="item in icon.items.slice(icon.items.length - (icon.items.length % 4),icon.items.length)">
-          <span class="icon-item"><span :class="'fa fa-'+item"></span>{{item}}</span>
+      <el-row :gutter="10" class="icon-row" v-if="(icon.items.length % countInRow) !== 0">
+        <el-col :span="6" v-for="item in icon.items.slice(icon.items.length - (icon.items.length % countInRow),icon.items.length)" :key="item">
+          <span class="icon-item" :class="{selected: hasSelected===item}" @click="selectIcon(item)"><span :class="'fa fa-'+item"></span>{{item}}</span>
         </el-col>
       </el-row>
     </template>
@@ -17,8 +17,10 @@
 </template>
 <script>
   export default {
+    props: {hasSelected: String},
     data () {
       return {
+        countInRow: 4,
         icons: [
           { type: '网页应用图标',
             items: [
@@ -62,6 +64,11 @@
           }
         ]
       }
+    },
+    methods: {
+      selectIcon (item) {
+        this.$emit('watchIconsDialog', item)
+      }
     }
   }
 </script>
@@ -83,14 +90,17 @@
         & span:first-child {
           margin-right: 5px;
         }
-        &:hover {
+        &:hover:not(.selected) {
           background-color: #efefef;
           & span:first-child {
             font-size: 18px;
           }
         }
       }
+      .selected {
+        background-color: #409eff;
+        color: #fff;
+      }
     }
-
   }
 </style>
