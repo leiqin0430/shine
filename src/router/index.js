@@ -18,6 +18,7 @@ const scss = () => import('@/views/tab2/scss')
 const echarts = () => import('@/views/charts/echarts')
 
 const menu = () => import('@/views/settings/menu')
+const role = () => import('@/views/settings/role')
 
 export default new VueRouter({
   routes: [
@@ -30,7 +31,8 @@ export default new VueRouter({
       component: Home,
       groupName: 'settings',
       children: [
-        {path: 'menu', name: '菜单管理', iconCls: 'el-icon-message', component: menu}
+        {path: 'menu', name: '菜单管理', iconCls: 'el-icon-message', component: menu},
+        {path: 'role', name: '角色管理', iconCls: 'el-icon-message', component: role}
       ]
     },
     {
