@@ -23,7 +23,7 @@
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="message">消息中心</el-dropdown-item>
-            <el-dropdown-item command="editPass">密码修改</el-dropdown-item>
+            <el-dropdown-item command="editPass">修改密码</el-dropdown-item>
             <el-dropdown-item command="logout">退出</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -44,7 +44,17 @@
         </el-menu>
       </el-aside>
       <el-main>
-        <router-view></router-view>
+        <el-tabs v-model="editableTabsValue" type="card" closable @tab-remove="removeTab" @tab-click="clickTab" class="tabsCls" style="height: 100%">
+          <el-tab-pane
+            v-for="(item, index) in editableTabs"
+            :key="item.name"
+            :label="item.title"
+            :name="item.name"
+            style="height: 100%;height: calc(100% - 56px);"
+          >
+            <router-view></router-view>
+          </el-tab-pane>
+        </el-tabs>
       </el-main>
     </el-container>
   </el-container>
@@ -59,7 +69,9 @@
         userName: common.getUserName(),
         topActiveIndex: 'settings',
         leftActiveIndex: '',
-        routesArr: []
+        routesArr: [],
+        editableTabsValue: '',
+        editableTabs: []
       }
     },
     created () {
@@ -76,6 +88,8 @@
             this.routesArr.push(routes[i])
           }
         }
+        // 清空tab页数组
+        this.editableTabs = []
         if (this.routesArr.length > 0) {
           if (this.routesArr[0].children) {
 //            this.$refs['leftMenu'].open(this.routesArr[0].path + '0')
@@ -90,8 +104,68 @@
         }
       },
       leftHandleSelect (key) {
+        console.log(this.routesArr)
+        let tabTitle = ''
+//        this.routesArr.forEach((route, index) => {
+//          if (route.children) {
+//            route.children.forEach((item, index) => {
+//              if (key.indexOf(item.path)) {
+//                tabTitle = item.name
+//              }
+//            })
+//          }
+//        })
+        if (key === '/menu') {
+          tabTitle = '菜单管理'
+        } else if (key === '/role') {
+          tabTitle = '角色管理'
+        } else if (key === '/grid') {
+          tabTitle = 'Table 表格'
+        } else if (key === '/form') {
+          tabTitle = 'Form 表单'
+        } else if (key === '/scss') {
+          tabTitle = 'scss'
+        } else if (key === '/echarts') {
+          tabTitle = 'echarts'
+        }
+        let tabs = this.editableTabs
+        let isExist = false
+        tabs.forEach((tab, index) => {
+          if (tab.name === key) {
+            isExist = true
+          }
+        })
+        if (!isExist) {
+          tabs.push({
+            title: tabTitle,
+            name: key
+          })
+        }
+        this.editableTabsValue = key
         this.leftActiveIndex = key
         this.$router.push({path: key})
+      },
+      removeTab (targetName) {
+        let tabs = this.editableTabs
+        let activeName = this.editableTabsValue
+        if (activeName === targetName) {
+          tabs.forEach((tab, index) => {
+            if (tab.name === targetName) {
+              let nextTab = tabs[index + 1] || tabs[index - 1]
+              if (nextTab) {
+                activeName = nextTab.name
+              }
+            }
+          })
+        }
+        this.editableTabsValue = activeName
+        this.editableTabs = tabs.filter(tab => tab.name !== targetName)
+        this.leftActiveIndex = activeName
+        this.$router.push({path: activeName})
+      },
+      clickTab (tab) {
+        this.leftActiveIndex = tab.name
+        this.$router.push({path: tab.name})
       },
       handleCommand (command) {
         switch (command) {
@@ -154,5 +228,10 @@
   }
   .el-aside {
     color: #333;
+  }
+  .tabsCls {
+    .el-tabs__content {
+      height: calc(100% - 56px);
+    }
   }
 </style>

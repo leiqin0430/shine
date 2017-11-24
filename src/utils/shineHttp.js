@@ -1,5 +1,5 @@
 import axios from 'axios'
-import qs from 'qs'
+// import qs from 'qs'
 // import { Message, Loading } from 'element-ui'
 import { Message } from 'element-ui'
 import router from '../router/index'
@@ -90,11 +90,13 @@ const shineHttp = cfg => {
     if (cfg.params) {
       config.params = cfg.params
     }
-  } else if (config.method === 'post') {
+  } else if (config.method === 'post' || config.method === 'delete') {
     if (cfg.params) {
-      config.data = qs.stringify(cfg.params)
+      // config.data = qs.stringify(cfg.params)
+      config.data = JSON.stringify(cfg.params)
     }
-    config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+    // config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+    config.headers['Content-Type'] = 'application/json;charset=utf-8'
   }
 
   return axios(config).then(function (resp) {

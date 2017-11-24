@@ -20,10 +20,10 @@
     <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
       <el-form :model="form">
         <el-form-item label="上级菜单" :label-width="formLabelWidth">
-          <el-input v-model="form.parentLabel" auto-complete="off"></el-input>
+          <el-input v-model="form.parentLabel" auto-complete="off" :readonly="true"></el-input>
         </el-form-item>
         <el-form-item label="名称" :label-width="formLabelWidth">
-          <el-input v-model="form.label" auto-complete="off"></el-input>
+          <el-input v-model="form.label" auto-complete="off" :autofocus="true"></el-input>
         </el-form-item>
         <el-form-item label="链接" :label-width="formLabelWidth">
         <el-input v-model="form.url" auto-complete="off"></el-input>
@@ -31,10 +31,10 @@
         <el-form-item label="图标" :label-width="formLabelWidth">
           <span :class="'fa fa-'+form.icon"></span>
           <span>{{form.icon ? form.icon : '无'}}</span>
-          <el-button @click="tempIcon = form.icon; innerIconVisible = true">选择</el-button>
+          <el-button @click="tempIcon = form.icon; innerIconVisible = true">选 择</el-button>
         </el-form-item>
         <el-form-item label="排序" :label-width="formLabelWidth">
-          <el-input-number v-model="form.order" controls-position="right" :min="1" :max="1000"></el-input-number>
+          <el-input-number v-model="form.order" controls-position="right"></el-input-number>
         </el-form-item>
         <el-form-item label="可见" :label-width="formLabelWidth">
           <el-radio-group v-model="form.visible">
@@ -66,7 +66,7 @@
       </el-dialog>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="saveMenu()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -74,49 +74,19 @@
 </template>
 <script>
   import icons from '../../components/icons.vue'
+  import api from '../../api/settings/menu'
   export default {
     data () {
       return {
         data: [{
-          id: '1',
-          label: '一级 1',
+          id: null,
+          label: '菜单树根节点',
           url: '',
-          icon: 'address-book',
           order: 1,
           visible: '1',
-          children: [{
-            id: '4',
-            label: '二级 1-1',
-            url: '',
-            icon: 'address-book-o',
-            order: 1,
-            visible: '1',
-            children: [{
-              id: '9',
-              label: '三级 1-1-1',
-              url: '/sys/user/info',
-              icon: 'address-book',
-              order: 1,
-              visible: '1',
-              children: []
-            }]
-          }]
-        }, {
-          id: '2',
-          label: '一级 2',
-          url: '',
           icon: '',
-          order: 2,
-          visible: '0',
-          children: [{
-            id: '5',
-            label: '二级 2-1',
-            url: '/sys/user/info',
-            icon: 'address-book-o',
-            order: 1,
-            visible: '0',
-            children: []
-          }]
+          remark: '根节点，不能删除',
+          children: []
         }],
         defaultProps: {
           children: 'children',
@@ -141,7 +111,16 @@
       }
     },
     components: { icons },
+    created () {
+      this.fetchData()
+    },
     methods: {
+      fetchData () {
+        let me = this
+        api.getMenuList(null, function (data) {
+          me.data[0].children = data.list
+        })
+      },
       handleNodeClick () {
         console.log('handleNodeClick')
       },
@@ -151,56 +130,70 @@
         let clsObj = {}
         clsObj[str] = true
 
-        return h('span', {'class': {menuRowCls: true}}, [
-          h('span', {'class': clsObj}, node.label),
-          h('span', {'class': clsObj}, data.url),
-          h('span', {'class': clsObj, style: {textAlign: 'center'}}, data.order),
-          h('span', {'class': clsObj, style: {textAlign: 'center'}}, data.visible === '1' ? '显示' : '隐藏'),
-          h('span', {'class': {operateCls: true}}, [
-            h('el-button', {attrs: {size: 'mini', type: 'text'},
-              on: {
-                click: function (event) {
+        let btnArr = [
+          h('el-button', {attrs: {size: 'mini', type: 'text'},
+            on: {
+              click: function (event) {
 //                  console.log('data', data)
 //                  console.log('node', node)
 //                  console.log('store', store)
-                  me.dialogFormVisible = true
-                  me.dialogTitle = '修改菜单'
-                  me.form.parentLabel = node.parent.data.label
-                  me.form.parentId = node.parent.data.id
-                  me.form.id = data.id
-                  me.form.label = data.label
-                  me.form.url = data.url
-                  me.form.icon = data.icon
-                  me.form.order = data.order
-                  me.form.visible = data.visible
-                  me.form.remark = data.remark
-                  event.stopPropagation()
-                }
-              }}, '修改'),
-            h('el-button', {attrs: {size: 'mini', type: 'text'},
-              on: {
-                click: function (event) {
-                  console.log('data', data)
+                me.dialogFormVisible = true
+                me.dialogTitle = '修改菜单'
+                me.form.parentLabel = node.parent.data.label
+                me.form.parentId = node.parent.data.id
+                me.form.id = data.id
+                me.form.label = data.label
+                me.form.url = data.url
+                me.form.icon = data.icon
+                me.form.order = data.order
+                me.form.visible = data.visible
+                me.form.remark = data.remark
+                event.stopPropagation()
+              }
+            }}, '修改'),
+          h('el-button', {attrs: {size: 'mini', type: 'text'},
+            on: {
+              click: function (event) {
+                console.log('data', data)
 //                  store.remove(data)
-                  let msg = (data.children.length > 0) ? '你确定要删除该菜单及其子菜单吗?' : '你确定要删除该菜单吗?'
-                  me.$confirm(msg, '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                  }).then(() => {
-                    me.$message({
-                      type: 'success',
-                      message: '删除成功!'
-                    })
-                  }).catch(() => {
-                    me.$message({
-                      type: 'info',
-                      message: '已取消删除'
-                    })
+                let msg = (data.children.length > 0) ? '你确定要删除该菜单及其子菜单吗?' : '你确定要删除该菜单吗?'
+                me.$confirm(msg, '提示', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                  type: 'warning'
+                }).then(() => {
+                  api.delMenu({id: data.id})
+                  me.fetchData()
+                }).catch(() => {
+                  me.$message({
+                    type: 'info',
+                    message: '已取消删除'
                   })
-                  event.stopPropagation()
-                }
-              }}, '删除'),
+                })
+                event.stopPropagation()
+              }
+            }}, '删除'),
+          h('el-button', {attrs: {size: 'mini', type: 'text'},
+            on: {
+              click: function (event) {
+//                  store.append({id: id++, label: 'new', children: []}, data)
+                me.dialogFormVisible = true
+                me.dialogTitle = '新增菜单'
+                me.form.parentLabel = data.label
+                me.form.parentId = data.id
+                me.form.id = null
+                me.form.label = ''
+                me.form.url = ''
+                me.form.icon = ''
+                me.form.order = 1
+                me.form.visible = '1'
+                me.form.remark = ''
+                event.stopPropagation()
+              }
+            }}, '添加下级菜单')
+        ]
+        if (node.level === 1) {
+          btnArr = [
             h('el-button', {attrs: {size: 'mini', type: 'text'},
               on: {
                 click: function (event) {
@@ -219,8 +212,23 @@
                   event.stopPropagation()
                 }
               }}, '添加下级菜单')
-          ])
+          ]
+        }
+        return h('span', {'class': {menuRowCls: true}}, [
+          h('span', {'class': clsObj}, node.label),
+          h('span', {'class': clsObj}, data.url),
+          h('span', {'class': clsObj, style: {textAlign: 'center'}}, data.order),
+          h('span', {'class': clsObj, style: {textAlign: 'center'}}, data.visible === '1' ? '显示' : '隐藏'),
+          h('span', {'class': {operateCls: true}}, btnArr)
         ])
+      },
+      saveMenu () {
+        let me = this
+        api.saveMenu(this.form, function (data) {
+          console.log(data)
+          me.dialogFormVisible = false
+          me.fetchData()
+        })
       },
       getSelectedIcon (data) {
         this.tempIcon = data
@@ -231,15 +239,16 @@
 
 <style lang="scss">
   @import "../../styles/_variable";
+  $tree-row-height: 40px;
   .grid-header {
     flex: 1;
     display: flex;
     align-items: center;
     color: #878d99;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    height: 30px;
-    line-height: 30px;
+    height: $tree-row-height;
+    line-height: $tree-row-height;
     text-align: center;
     border-top: 1px solid $border-color;
     border-right: 1px solid $border-color;
@@ -260,24 +269,24 @@
   }
   .menu-tree .el-tree-node__content {
     border-bottom: 1px solid $border-color;
-    height: 30px;
+    height: $tree-row-height;
   }
   .menuRowCls {
     flex: 1;
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
   }
   .menuColCls1 {
     border-right: 1px solid $border-color;
-    height: 30px;
-    line-height: 30px;
+    height: $tree-row-height;
+    line-height: $tree-row-height;
     width: calc((100% - 180px) / 4);
   }
   .menuColCls2 {
     border-right: 1px solid $border-color;
-    height: 30px;
-    line-height: 30px;
+    height: $tree-row-height;
+    line-height: $tree-row-height;
     width: calc((100% + 18px - 180px) / 4);
   }
   .menuRowCls .menuColCls2:first-of-type {
@@ -285,12 +294,30 @@
   }
   .menuColCls3 {
     border-right: 1px solid $border-color;
-    height: 30px;
-    line-height: 30px;
+    height: $tree-row-height;
+    line-height: $tree-row-height;
     width: calc((100% + 2 * 18px - 180px) / 4);
   }
   .menuRowCls .menuColCls3:first-of-type {
     width: calc(((100% + 2 * 18px - 180px) / 4) - 2 * 18px);
+  }
+  .menuColCls4 {
+    border-right: 1px solid $border-color;
+    height: $tree-row-height;
+    line-height: $tree-row-height;
+    width: calc((100% + 3 * 18px - 180px) / 4);
+  }
+  .menuRowCls .menuColCls4:first-of-type {
+    width: calc(((100% + 3 * 18px - 180px) / 4) - 3 * 18px);
+  }
+  .menuColCls5 {
+    border-right: 1px solid $border-color;
+    height: $tree-row-height;
+    line-height: $tree-row-height;
+    width: calc((100% + 4 * 18px - 180px) / 4);
+  }
+  .menuRowCls .menuColCls5:first-of-type {
+    width: calc(((100% + 4 * 18px - 180px) / 4) - 4 * 18px);
   }
   .operateCls {
     width: 180px;
