@@ -1,9 +1,9 @@
 import shineHttp from '@/utils/shineHttp'
 import HttpConfig from '@/bean/HttpConfig'
 
-const getRoleList = (params, fn1, fn2) => {
+const getUserList = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/role/list',
+    url: '/account/list',
     method: 'get',
     params: params,
     reminder: false,
@@ -12,9 +12,9 @@ const getRoleList = (params, fn1, fn2) => {
   }))
 }
 
-const saveRole = (params, fn1, fn2) => {
+const saveUser = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/role/persist',
+    url: '/account/persist',
     method: 'post',
     params: params,
     reminder: true,
@@ -23,9 +23,9 @@ const saveRole = (params, fn1, fn2) => {
   }))
 }
 
-const delRole = (params, fn1, fn2) => {
+const delUser = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/role/clear',
+    url: '/account/clear',
     method: 'delete',
     params: params,
     reminder: true,
@@ -34,20 +34,9 @@ const delRole = (params, fn1, fn2) => {
   }))
 }
 
-const getRoleMenuAuth = (params, fn1, fn2) => {
+const resetPwd = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/role/checkedMenuByRid',
-    method: 'get',
-    params: params,
-    reminder: false,
-    success: fn1,
-    error: fn2
-  }))
-}
-
-const saveRoleMenuAuth = (params, fn1, fn2) => {
-  return shineHttp(new HttpConfig({
-    url: '/role/linkRoleMenu',
+    url: '/account/reset',
     method: 'post',
     params: params,
     reminder: true,
@@ -56,9 +45,9 @@ const saveRoleMenuAuth = (params, fn1, fn2) => {
   }))
 }
 
-const getRoleResAuth = (params, fn1, fn2) => {
+const getUserDeptAuth = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/role/checkedResByRid',
+    url: '/account/checkedDeptByUid',
     method: 'get',
     params: params,
     reminder: false,
@@ -67,9 +56,31 @@ const getRoleResAuth = (params, fn1, fn2) => {
   }))
 }
 
-const saveRoleResAuth = (params, fn1, fn2) => {
+const saveUserDeptAuth = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/role/linkRoleRes',
+    url: '/account/linkUserDept',
+    method: 'post',
+    params: params,
+    reminder: true,
+    success: fn1,
+    error: fn2
+  }))
+}
+
+const getUserRoleAuth = (params, fn1, fn2) => {
+  return shineHttp(new HttpConfig({
+    url: '/account/checkedRoleByUid',
+    method: 'get',
+    params: params,
+    reminder: false,
+    success: fn1,
+    error: fn2
+  }))
+}
+
+const saveUserRoleAuth = (params, fn1, fn2) => {
+  return shineHttp(new HttpConfig({
+    url: '/account/linkUserRole',
     method: 'post',
     params: params,
     reminder: true,
@@ -79,11 +90,12 @@ const saveRoleResAuth = (params, fn1, fn2) => {
 }
 
 export default {
-  getRoleList,
-  saveRole,
-  delRole,
-  getRoleMenuAuth,
-  saveRoleMenuAuth,
-  getRoleResAuth,
-  saveRoleResAuth
+  getUserList,
+  saveUser,
+  delUser,
+  resetPwd,
+  getUserDeptAuth,
+  saveUserDeptAuth,
+  getUserRoleAuth,
+  saveUserRoleAuth
 }

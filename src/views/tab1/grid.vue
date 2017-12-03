@@ -55,8 +55,6 @@
         let me = this
         getBorrowList(this.formInline, function (data) {
           me.tableData = data.page.rows
-        }, function (data) {
-          alert('自行处理错误')
         })
       },
       onSubmit () {

@@ -23,15 +23,33 @@
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="message">消息中心</el-dropdown-item>
-            <el-dropdown-item command="editPass">修改密码</el-dropdown-item>
+            <el-dropdown-item command="modifyPwd">修改密码</el-dropdown-item>
             <el-dropdown-item command="logout">退出</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
+      <!--修改密码dialog-->
+      <el-dialog title="修改密码" :visible.sync="pwdDialogVisible" :close-on-click-modal="false" width="30%">
+        <el-form :model="pwdForm" status-icon :rules="pwdRules" ref="pwdForm" label-width="80px">
+          <el-form-item label="原密码" prop="oldPwd">
+            <el-input type="password" v-model="pwdForm.oldPwd" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="新密码" prop="newPwd">
+            <el-input type="password" v-model="pwdForm.newPwd" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="确认密码" prop="checkPwd">
+            <el-input type="password" v-model="pwdForm.checkPwd" auto-complete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button @click="pwdDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="modifyPwdOk('pwdForm')">确 定</el-button>
+        </div>
+      </el-dialog>
     </el-header>
     <el-container>
-      <el-aside style="background-color: #eef1f6;">
-        <el-menu :default-active="leftActiveIndex" @select="leftHandleSelect" ref="leftMenu">
+      <el-aside style="background-color: #545c64;">
+        <el-menu :default-active="leftActiveIndex" @select="leftHandleSelect" ref="leftMenu" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" style="border-right-color: #545c64">
           <template v-for="(item, index1) in routesArr" v-if="!item.hidden">
             <el-submenu v-if="item.children" :index="item.path+index1" :key="index1">
               <template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
@@ -44,17 +62,18 @@
         </el-menu>
       </el-aside>
       <el-main>
-        <el-tabs v-model="editableTabsValue" type="card" closable @tab-remove="removeTab" @tab-click="clickTab" class="tabsCls" style="height: 100%">
+        <el-tabs v-model="editableTabsValue" type="card" closable @tab-remove="removeTab" @tab-click="clickTab">
           <el-tab-pane
             v-for="(item, index) in editableTabs"
             :key="item.name"
             :label="item.title"
             :name="item.name"
-            style="height: 100%;height: calc(100% - 56px);"
           >
-            <router-view></router-view>
           </el-tab-pane>
         </el-tabs>
+        <!--<keep-alive>-->
+          <router-view></router-view>
+        <!--</keep-alive>-->
       </el-main>
     </el-container>
   </el-container>
@@ -62,16 +81,53 @@
 
 <script>
   import common from '../utils/common'
+//  import home from '../api/home'
   export default {
 //    name: 'home',
     data () {
+      let validateNewPwd = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入新密码'))
+        } else {
+          if (this.pwdForm.checkPwd !== '') {
+            this.$refs.pwdForm.validateField('checkPwd')
+          }
+          callback()
+        }
+      }
+      let validateCheckPwd = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请再次输入新密码'))
+        } else if (value !== this.pwdForm.newPwd) {
+          callback(new Error('两次输入密码不一致!'))
+        } else {
+          callback()
+        }
+      }
       return {
         userName: common.getUserName(),
         topActiveIndex: 'settings',
         leftActiveIndex: '',
         routesArr: [],
         editableTabsValue: '',
-        editableTabs: []
+        editableTabs: [],
+        pwdForm: {
+          oldPwd: '',
+          newPwd: '',
+          checkPwd: ''
+        },
+        pwdRules: {
+          oldPwd: [
+            { required: true, message: '请输入原密码', trigger: 'blur' }
+          ],
+          newPwd: [
+            { required: true, validator: validateNewPwd, trigger: 'blur' }
+          ],
+          checkPwd: [
+            { required: true, validator: validateCheckPwd, trigger: 'blur' }
+          ]
+        },
+        pwdDialogVisible: false
       }
     },
     created () {
@@ -104,7 +160,7 @@
         }
       },
       leftHandleSelect (key) {
-        console.log(this.routesArr)
+//        console.log(this.routesArr)
         let tabTitle = ''
 //        this.routesArr.forEach((route, index) => {
 //          if (route.children) {
@@ -127,6 +183,14 @@
           tabTitle = 'scss'
         } else if (key === '/echarts') {
           tabTitle = 'echarts'
+        } else if (key === '/resource') {
+          tabTitle = '资源管理'
+        } else if (key === '/dept') {
+          tabTitle = '部门管理'
+        } else if (key === '/user') {
+          tabTitle = '用户管理'
+        } else if (key === '/dict') {
+          tabTitle = '字典管理'
         }
         let tabs = this.editableTabs
         let isExist = false
@@ -172,8 +236,8 @@
           case 'message':
             this.$message('click on item ' + command)
             break
-          case 'editPass':
-            this.$message('click on item ' + command)
+          case 'modifyPwd':
+            this.pwdDialogVisible = true
             break
           case 'logout':
             this.$confirm('确定要退出系统吗?', '系统提示', {
@@ -197,12 +261,24 @@
             this.$message('click on item ' + command)
             break
         }
+      },
+      modifyPwdOk (formName) {
+        let me = this
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+//            home.modifyPwd(this.pwdForm, function (data) {
+            me.pwdDialogVisible = false
+//            })
+          } else {
+            return false
+          }
+        })
       }
     }
   }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .el-header {
     background-color: #545c64;
     color: #fff;
@@ -215,7 +291,6 @@
   .el-menu-top {
     float: left;
     width: calc(100% - 280px - 60px);
-    background-color: #545c64;
   }
   .sysUser {
     float: right;
@@ -226,12 +301,12 @@
       color: #409EFF;
     }
   }
-  .el-aside {
-    color: #333;
-  }
-  .tabsCls {
-    .el-tabs__content {
-      height: calc(100% - 56px);
-    }
-  }
+  /*.el-aside {*/
+    /*color: #333;*/
+  /*}*/
+  /*.tabsCls {*/
+    /*.el-tabs__content {*/
+      /*height: calc(100% - 56px);*/
+    /*}*/
+  /*}*/
 </style>

@@ -10,7 +10,7 @@ const Err404 = () => import('@/views/Err404')
 // const form = () => import('@/views/tab1/form')
 
 const Home = () => import(/* webpackChunkName: "group-foo" */ '@/views/Home')
-const grid = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/grid')
+// const grid = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/grid')
 const form = () => import(/* webpackChunkName: "group-foo" */ '@/views/tab1/form')
 
 const scss = () => import('@/views/tab2/scss')
@@ -19,6 +19,10 @@ const echarts = () => import('@/views/charts/echarts')
 
 const menu = () => import('@/views/settings/menu')
 const role = () => import('@/views/settings/role')
+const resource = () => import('@/views/settings/resource')
+const dict = () => import('@/views/settings/dict')
+const dept = () => import('@/views/settings/dept')
+const user = () => import('@/views/settings/user')
 
 export default new VueRouter({
   routes: [
@@ -32,7 +36,11 @@ export default new VueRouter({
       groupName: 'settings',
       children: [
         {path: 'menu', name: '菜单管理', iconCls: 'el-icon-message', component: menu},
-        {path: 'role', name: '角色管理', iconCls: 'el-icon-message', component: role}
+        {path: 'resource', name: '资源管理', iconCls: 'el-icon-message', component: resource},
+        {path: 'role', name: '角色管理', iconCls: 'el-icon-message', component: role},
+        {path: 'dept', name: '部门管理', iconCls: 'el-icon-message', component: dept},
+        {path: 'user', name: '用户管理', iconCls: 'el-icon-message', component: user},
+        {path: 'dict', name: '字典管理', iconCls: 'el-icon-message', component: dict}
       ]
     },
     {
@@ -42,7 +50,7 @@ export default new VueRouter({
       component: Home,
       groupName: 'processing',
       children: [
-        {path: 'grid', name: 'Table 表格', iconCls: 'el-icon-message', component: grid},
+        // {path: 'grid', name: 'Table 表格', iconCls: 'el-icon-message', component: grid},
         {path: 'form', name: 'Form 表单', iconCls: 'el-icon-setting', component: form}
       ]
     },

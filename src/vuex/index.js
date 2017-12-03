@@ -6,7 +6,9 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     count: 2,
-    AUTH_TOKEN: ''
+    AUTH_TOKEN: '',
+    fileUploadPath: process.env.BASE_URL + '/file/upload',
+    defaultPassword: '123456'
   },
   mutations: {
     increment: function (ss) {

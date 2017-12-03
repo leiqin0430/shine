@@ -18,37 +18,32 @@
     </el-tree>
     <!--新增/修改菜单Dialog-->
     <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-form :model="form">
-        <el-form-item label="上级菜单" :label-width="formLabelWidth">
+      <el-form :model="form" :label-width="formLabelWidth">
+        <el-form-item label="上级菜单">
           <el-input v-model="form.parentLabel" auto-complete="off" :readonly="true"></el-input>
         </el-form-item>
-        <el-form-item label="名称" :label-width="formLabelWidth">
+        <el-form-item label="名称">
           <el-input v-model="form.label" auto-complete="off" :autofocus="true"></el-input>
         </el-form-item>
-        <el-form-item label="链接" :label-width="formLabelWidth">
-        <el-input v-model="form.url" auto-complete="off"></el-input>
-      </el-form-item>
-        <el-form-item label="图标" :label-width="formLabelWidth">
+        <el-form-item label="链接">
+          <el-input v-model="form.url" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="图标">
           <span :class="'fa fa-'+form.icon"></span>
           <span>{{form.icon ? form.icon : '无'}}</span>
           <el-button @click="tempIcon = form.icon; innerIconVisible = true">选 择</el-button>
         </el-form-item>
-        <el-form-item label="排序" :label-width="formLabelWidth">
+        <el-form-item label="排序">
           <el-input-number v-model="form.order" controls-position="right"></el-input-number>
         </el-form-item>
-        <el-form-item label="可见" :label-width="formLabelWidth">
+        <el-form-item label="可见">
           <el-radio-group v-model="form.visible">
             <el-radio :label="'1'">显示</el-radio>
-            <el-radio :label="'0'">隐藏</el-radio>
+            <el-radio :label="'2'">隐藏</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="备注" :label-width="formLabelWidth">
-          <el-input
-            type="textarea"
-            :rows="2"
-            placeholder="请输入内容"
-            v-model="form.remark">
-          </el-input>
+        <el-form-item label="备注">
+          <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
       <!--选择图标Dialog-->
@@ -162,8 +157,9 @@
                   cancelButtonText: '取消',
                   type: 'warning'
                 }).then(() => {
-                  api.delMenu({id: data.id})
-                  me.fetchData()
+                  api.delMenu({id: data.id}, function (data) {
+                    me.fetchData()
+                  })
                 }).catch(() => {
                   me.$message({
                     type: 'info',
@@ -225,7 +221,6 @@
       saveMenu () {
         let me = this
         api.saveMenu(this.form, function (data) {
-          console.log(data)
           me.dialogFormVisible = false
           me.fetchData()
         })
