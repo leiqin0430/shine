@@ -19,17 +19,17 @@
     </el-tree>
     <!--新增/修改部门Dialog-->
     <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-form :model="form" :label-width="formLabelWidth">
+      <el-form :model="form" :rules="deptRules" ref="deptForm" label-width="100px">
         <el-form-item label="上级部门">
           <el-input v-model="form.dPname" :readonly="true"></el-input>
         </el-form-item>
-        <el-form-item label="部门名称">
-          <el-input v-model="form.dName" auto-complete="off"></el-input>
+        <el-form-item label="部门名称" prop="dName">
+          <el-input v-model="form.dName"></el-input>
         </el-form-item>
-        <el-form-item label="部门编号">
-          <el-input v-model="form.dCode" auto-complete="off"></el-input>
+        <el-form-item label="部门编号" prop="dCode">
+          <el-input v-model="form.dCode"></el-input>
         </el-form-item>
-        <el-form-item label="部门类型">
+        <el-form-item label="部门类型" prop="dType">
           <el-select v-model="form.dType" placeholder="请选择">
             <el-option
               v-for="i in dictOptions.deptType"
@@ -39,7 +39,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="部门级别">
+        <el-form-item label="部门级别" prop="dLevel">
           <el-select v-model="form.dLevel" placeholder="请选择">
             <el-option
               v-for="i in dictOptions.deptLevel"
@@ -49,7 +49,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="是否可用">
+        <el-form-item label="是否可用" prop="isable">
           <el-select v-model="form.isable" placeholder="请选择">
             <el-option
               v-for="i in dictOptions.sf"
@@ -62,13 +62,13 @@
         <el-form-item label="联系人">
           <el-input v-model="form.dConnectId"></el-input>
         </el-form-item>
-        <el-form-item label="电话">
+        <el-form-item label="电话" prop="dTel">
           <el-input v-model="form.dTel"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱">
+        <el-form-item label="邮箱" prop="dEmail">
           <el-input v-model="form.dEmail"></el-input>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
@@ -81,7 +81,7 @@
   </section>
 </template>
 <script>
-  import common from '../../utils/common'
+  //  import common from '../../utils/common'
   import api from '../../api/settings/dept'
   export default {
     data () {
@@ -100,12 +100,11 @@
           label: 'dName'
         },
         dictOptions: {
-          sf: [],
-          deptType: [],
-          deptLevel: []
+          sf: this.$store.state.dictList.filter(o => o.dClassify === 'SF'),
+          deptType: this.$store.state.dictList.filter(o => o.dClassify === 'DEPT_TYPE'),
+          deptLevel: this.$store.state.dictList.filter(o => o.dClassify === 'DEPT_LEVEL')
         },
         dialogFormVisible: false,
-        innerIconVisible: false,
         dialogTitle: '',
         form: {
           dPid: '',
@@ -121,23 +120,38 @@
           isable: '',
           remark: ''
         },
-        formLabelWidth: '100px',
-        tempIcon: ''
+        deptRules: {
+          dName: [
+            { required: true, message: '请输入部门名称' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          dCode: [
+            { required: true, message: '请输入部门编号' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          dLevel: [
+            { required: true, message: '请选择部门级别', trigger: 'change' }
+          ],
+          dType: [
+            { required: true, message: '请选择部门类型', trigger: 'change' }
+          ],
+          dEmail: [
+            { type: 'email', message: '请输入格式正确的邮箱' }
+          ],
+          dTel: [
+            { pattern: /^(1[34578]\d{9})|(0\d{2}-\d{8})|(0\d{3}-\d{7})$/, message: '请输入格式正确的手机或电话号码' }
+          ],
+          isable: [
+            { required: true, message: '请选择是否可用', trigger: 'change' }
+          ],
+          remark: [
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符' }
+          ]
+        }
       }
     },
     created () {
-      let me = this
       this.fetchData()
-      // 获取下拉字典：是否可用
-      common.getDictList({dClassify: 'SF'}, function (data) {
-        me.dictOptions.sf = data.page.rows
-      })
-      common.getDictList({dClassify: 'DEPT_TYPE'}, function (data) {
-        me.dictOptions.deptType = data.page.rows
-      })
-      common.getDictList({dClassify: 'DEPT_LEVEL'}, function (data) {
-        me.dictOptions.deptLevel = data.page.rows
-      })
     },
     methods: {
       fetchData () {
@@ -147,7 +161,7 @@
         })
       },
       handleNodeClick () {
-        console.log('handleNodeClick')
+//        console.log('handleNodeClick')
       },
       renderContent (h, { node, data, store }) {
         let me = this
@@ -159,31 +173,29 @@
           h('el-button', {attrs: {size: 'mini', type: 'text'},
             on: {
               click: function (event) {
-//                  console.log('data', data)
-//                  console.log('node', node)
-//                  console.log('store', store)
                 me.dialogFormVisible = true
                 me.dialogTitle = '修改部门'
-                me.form.dPid = node.parent.data.id
-                me.form.dPname = node.parent.data.dName
-                me.form.id = data.id
-                me.form.dName = data.dName
-                me.form.dCode = data.dCode
-                me.form.dLevel = data.dLevel
-                me.form.dType = data.dType
-                me.form.dConnectId = data.dConnectId
-                me.form.dEmail = data.dEmail
-                me.form.dTel = data.dTel
-                me.form.isable = data.isable
-                me.form.remark = data.remark
+                me.$nextTick(function () {
+                  me.$refs['deptForm'].resetFields()
+                  me.form.dPid = node.parent.data.id
+                  me.form.dPname = node.parent.data.dName
+                  me.form.id = data.id
+                  me.form.dName = data.dName
+                  me.form.dCode = data.dCode
+                  me.form.dLevel = data.dLevel
+                  me.form.dType = data.dType
+                  me.form.dConnectId = data.dConnectId
+                  me.form.dEmail = data.dEmail
+                  me.form.dTel = data.dTel
+                  me.form.isable = data.isable
+                  me.form.remark = data.remark
+                })
                 event.stopPropagation()
               }
             }}, '修改'),
           h('el-button', {attrs: {size: 'mini', type: 'text'},
             on: {
               click: function (event) {
-                console.log('data', data)
-//                  store.remove(data)
                 let msg = (data.children.length > 0) ? '你确定要删除该部门及其子部门吗?' : '你确定要删除该部门吗?'
                 me.$confirm(msg, '提示', {
                   confirmButtonText: '确定',
@@ -205,33 +217,10 @@
           h('el-button', {attrs: {size: 'mini', type: 'text'},
             on: {
               click: function (event) {
-//                  store.append({id: id++, label: 'new', children: []}, data)
                 me.dialogFormVisible = true
                 me.dialogTitle = '新增部门'
-                me.form.dPid = data.id
-                me.form.dPname = data.dName
-                me.form.id = null
-                me.form.dName = ''
-                me.form.dCode = ''
-                me.form.dLevel = ''
-                me.form.dType = ''
-                me.form.dConnectId = ''
-                me.form.dEmail = ''
-                me.form.dTel = ''
-                me.form.isable = ''
-                me.form.remark = ''
-                event.stopPropagation()
-              }
-            }}, '添加下级部门')
-        ]
-        if (node.level === 1) {
-          btnArr = [
-            h('el-button', {attrs: {size: 'mini', type: 'text'},
-              on: {
-                click: function (event) {
-//                  store.append({id: id++, label: 'new', children: []}, data)
-                  me.dialogFormVisible = true
-                  me.dialogTitle = '新增部门'
+                me.$nextTick(function () {
+                  me.$refs['deptForm'].resetFields()
                   me.form.dPid = data.id
                   me.form.dPname = data.dName
                   me.form.id = null
@@ -244,6 +233,33 @@
                   me.form.dTel = ''
                   me.form.isable = ''
                   me.form.remark = ''
+                })
+                event.stopPropagation()
+              }
+            }}, '添加下级部门')
+        ]
+        if (node.level === 1) {
+          btnArr = [
+            h('el-button', {attrs: {size: 'mini', type: 'text'},
+              on: {
+                click: function (event) {
+                  me.dialogFormVisible = true
+                  me.dialogTitle = '新增部门'
+                  me.$nextTick(function () {
+                    me.$refs['deptForm'].resetFields()
+                    me.form.dPid = data.id
+                    me.form.dPname = data.dName
+                    me.form.id = null
+                    me.form.dName = ''
+                    me.form.dCode = ''
+                    me.form.dLevel = ''
+                    me.form.dType = ''
+                    me.form.dConnectId = ''
+                    me.form.dEmail = ''
+                    me.form.dTel = ''
+                    me.form.isable = ''
+                    me.form.remark = ''
+                  })
                   event.stopPropagation()
                 }
               }}, '添加下级部门')
@@ -260,9 +276,15 @@
       },
       saveDept () {
         let me = this
-        api.saveDept(this.form, function (data) {
-          me.dialogFormVisible = false
-          me.fetchData()
+        this.$refs['deptForm'].validate((valid) => {
+          if (valid) {
+            api.saveDept(this.form, function (data) {
+              me.dialogFormVisible = false
+              me.fetchData()
+            })
+          } else {
+            return false
+          }
         })
       }
     }
@@ -284,16 +306,16 @@
     text-align: center;
     border-top: 1px solid $border-color;
     border-right: 1px solid $border-color;
-    .col {
-      width: calc((100% - 25px - 180px) / 5);
-      border-left: 1px solid $border-color;
-    }
-    .col:first-of-type {
-      width: calc(((100% - 25px - 180px) / 5) + 24px)
-    }
-    .col:last-of-type {
-      width: 180px
-    }
+  .col {
+    width: calc((100% - 25px - 180px) / 5);
+    border-left: 1px solid $border-color;
+  }
+  .col:first-of-type {
+    width: calc(((100% - 25px - 180px) / 5) + 24px)
+  }
+  .col:last-of-type {
+    width: 180px
+  }
   }
   .menu-tree {
     border: 1px solid $border-color;

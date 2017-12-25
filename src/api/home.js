@@ -1,9 +1,9 @@
 import shineHttp from '@/utils/shineHttp'
 import HttpConfig from '@/bean/HttpConfig'
 
-const getDeptList = (params, fn1, fn2) => {
+const getMenuListByUid = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/dept/list',
+    url: '/menu/byUid',
     method: 'get',
     params: params,
     reminder: false,
@@ -36,7 +36,7 @@ const delDept = (params, fn1, fn2) => {
 
 const modifyPwd = (params, fn1, fn2) => {
   return shineHttp(new HttpConfig({
-    url: '/dept/persist',
+    url: '/log/reset',
     method: 'post',
     params: params,
     reminder: true,
@@ -46,7 +46,7 @@ const modifyPwd = (params, fn1, fn2) => {
 }
 
 export default {
-  getDeptList,
+  getMenuListByUid,
   saveDept,
   delDept,
   modifyPwd

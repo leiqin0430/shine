@@ -1,23 +1,21 @@
 <template>
-  <div class="login-container">
-    <h2 class="title">系统登录</h2>
-  <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-width="50px" class="login-ruleForm">
-    <el-form-item label="账号" prop="account">
-      <el-input type="text" v-model="loginForm.account" auto-complete="off"></el-input>
-    </el-form-item>
-    <el-form-item label="密码" prop="pass">
-      <el-input type="password" v-model="loginForm.pass" auto-complete="off"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="submitForm('loginForm')" style="width: 100%;">登录</el-button>
-      <!--<el-button @click="resetForm('loginForm')">重置</el-button>-->
-    </el-form-item>
-  </el-form>
-    <!--<div>-->
-      <!--<p>{{count}}</p>-->
-      <!--<button @click="increment">+</button>-->
-      <!--<button @click="decrement">-</button>-->
-    <!--</div>-->
+  <div class="login-bg">
+    <div class="login-container">
+      <h3 class="title">欢迎登录</h3>
+      <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-width="50px">
+        <el-form-item label="账号" prop="account">
+          <el-input type="text" v-model="loginForm.account"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="pass">
+          <el-input type="password" v-model="loginForm.pass" @keyup.enter.native="submitForm('loginForm')"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="loadingFlag" @click="submitForm('loginForm')" style="width: 100%;">登录</el-button>
+          <!--<el-button @click="resetForm('loginForm')">重置</el-button>-->
+        </el-form-item>
+      </el-form>
+      <p class="login-tip">若密码忘记了请联系管理员</p>
+    </div>
   </div>
 </template>
 
@@ -28,9 +26,10 @@
     data () {
       return {
         loginForm: {
-          account: 'admin',
+          account: '',
           pass: ''
         },
+        loadingFlag: false,
         loginRules: {
           account: [
             { required: true, message: '请输入账号', trigger: 'blur' }
@@ -41,57 +40,60 @@
         }
       }
     },
-    computed: {
-      count: function () {
-        return this.$store.state.count
-      }
-    },
     methods: {
       submitForm (formName) {
+        this.loadingFlag = true
         let me = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            let params = {'accountNo': this.loginForm.account, 'password': this.loginForm.pass}
+            let params = {'username': this.loginForm.account, 'password': this.loginForm.pass}
             login(params, function (data) {
-              data.token = 'test1234'
-              localStorage.setItem('user', JSON.stringify(data))
-              me.$store.commit('setToken', data.token)
-              me.$router.push({ path: '/grid' })
+              me.loadingFlag = false
+              localStorage.setItem('shine_user', JSON.stringify(data.obj))
+              me.$store.commit('setToken', data.obj.token)
+              me.$router.push({ path: '/' })
+            }, function (data) {
+              me.loadingFlag = false
+              me.$message.info(data.resultInfo)
             })
           } else {
-            this.$message.error('表单提交失败')
+            this.loadingFlag = false
             return false
           }
         })
-      },
-      resetForm (formName) {
-        this.$refs[formName].resetFields()
-      },
-      increment () {
-        this.$store.commit('increment')
-      },
-      decrement () {
-        this.$store.commit('decrement')
       }
     }
   }
 </script>
 
 <style lang="scss" scoped>
-  .title {
-    margin-bottom: 22px;
-    text-align: center;
-    color: #5a5e66;
-  }
-  .login-container {
-    min-width: 300px;
-    max-width: 350px;
-    margin: 200px auto 0px auto;
-    padding: 42px 40px 40px 40px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  .login-ruleForm {
-    margin: 0 auto;
+  .login-bg {
+    width: 100%;
+    height: 100%;
+    /*background-image: url(https://file.iviewui.com/iview-admin/login_bg.jpg);*/
+    background-image: url(../assets/login_bg.jpg);
+    background-size: cover;
+    background-position: 50%;
+    position: relative;
+    .login-container {
+      width: 260px;
+      padding: 42px 40px 40px 40px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      position: absolute;
+      right: 150px;
+      top: 30%;
+      background: #fff;
+      .title {
+        margin-bottom: 22px;
+        text-align: center;
+        color: #5a5e66;
+      }
+      .login-tip {
+        font-size: 10px;
+        text-align: center;
+        color: #c3c3c3;
+      }
+    }
   }
 </style>

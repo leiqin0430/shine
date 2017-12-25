@@ -1,6 +1,12 @@
-body,h2 {
+body,p,h2,h3 {
   margin: 0;
 }
 .shine-tab-content {
   height: calc(100% - 56px);
+}
+.shine-menu-icon {
+  width: 24px;
+  font-size: 16px !important;
+  text-align: center;
+  margin-right: 5px;
 }

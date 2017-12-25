@@ -10,15 +10,18 @@
       </el-form-item>
     </el-form>
     <el-table :data="tableData" height="'auto'" size="small" border stripe style="height: calc((100% - 51px) - 32px)">
-      <el-table-column prop="dName" label="字典名称" width="180" header-align="center">
+      <el-table-column prop="dName" label="字典名称" width="220" header-align="center">
       </el-table-column>
-      <el-table-column prop="dClassify" label="标识符" width="120" header-align="center">
+      <el-table-column prop="dClassify" label="标识符" width="200" header-align="center">
       </el-table-column>
-      <el-table-column prop="dTitle" label="显示值" width="120" header-align="center">
+      <el-table-column prop="dTitle" label="显示值" width="220" header-align="center">
       </el-table-column>
-      <el-table-column prop="dCode" label="实际值" width="120" header-align="center">
+      <el-table-column prop="dCode" label="实际值" width="150" header-align="center">
       </el-table-column>
-      <el-table-column prop="isable" label="是否可用" width="120" header-align="center" align="center">
+      <el-table-column prop="isable" label="是否可用" width="100" header-align="center" align="center">
+        <template slot-scope="scope">
+          <span v-for="item in dictOptions.sf" v-if="item.dCode === scope.row.isable">{{item.dTitle}}</span>
+        </template>
       </el-table-column>
       <el-table-column prop="remark" label="备注" header-align="center" show-overflow-tooltip>
       </el-table-column>
@@ -40,34 +43,32 @@
     </el-pagination>
     <!--新增字典dialog-->
     <el-dialog title="新增字典" :visible.sync="dictDialogVisible" :close-on-click-modal="false">
-      <el-form :model="dictForm" :label-width="formLabelWidth">
+      <el-form :model="dictForm" :rules="addDictRules" ref="addDictForm" :label-width="formLabelWidth">
         <!--<el-form-item label="上级字典">-->
-          <!--<el-select-->
-            <!--v-model="dictForm.pname"-->
-            <!--filterable-->
-            <!--remote-->
-            <!--reserve-keyword-->
-            <!--placeholder="请输入关键词"-->
-            <!--:remote-method="remoteMethod"-->
-            <!--:loading="loading">-->
-            <!--<el-option-->
-              <!--v-for="item in options4"-->
-              <!--:key="item.value"-->
-              <!--:label="item.label"-->
-              <!--:value="item.value">-->
-            <!--</el-option>-->
-          <!--</el-select>-->
+        <!--<el-select-->
+        <!--v-model="dictForm.pname"-->
+        <!--filterable-->
+        <!--remote-->
+        <!--reserve-keyword-->
+        <!--placeholder="请输入关键词"-->
+        <!--:remote-method="remoteMethod"-->
+        <!--:loading="loading">-->
+        <!--<el-option-->
+        <!--v-for="item in options4"-->
+        <!--:key="item.value"-->
+        <!--:label="item.label"-->
+        <!--:value="item.value">-->
+        <!--</el-option>-->
+        <!--</el-select>-->
         <!--</el-form-item>-->
-        <el-form-item label="字典名称">
+        <el-form-item label="字典名称" prop="dName">
           <el-input v-model="dictForm.dName" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="标识符">
+        <el-form-item label="标识符" prop="dClassify">
           <el-input v-model="dictForm.dClassify" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="字典值">
-          <el-tooltip content="添加" placement="right">
-            <span class="el-icon-circle-plus icon-addDictItem" @click.prevent="addItem"></span>
-          </el-tooltip>
+          <span class="el-icon-circle-plus icon-addDictItem" @click.prevent="addItem"></span>
           <el-row v-for="(item, index) in dictForm.items" :key="item.value">
             <el-col :span="22">
               <el-row>
@@ -108,31 +109,29 @@
               </el-row>
             </el-col>
             <el-col :span="2">
-              <el-tooltip content="移除" placement="right">
-                <span class="el-icon-remove icon-removeDictItem" @click.prevent="removeItem(item)"></span>
-              </el-tooltip>
+              <span class="el-icon-remove icon-removeDictItem" @click.prevent="removeItem(item)"></span>
             </el-col>
           </el-row>
         </el-form-item>
       </el-form>
       <div slot="footer">
         <el-button @click="dictDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="saveDict('add')">确 定</el-button>
+        <el-button type="primary" @click="saveDict('addDictForm')">确 定</el-button>
       </div>
     </el-dialog>
     <!--修改字典dialog-->
     <el-dialog title="修改字典" :visible.sync="uDictDialogVisible" :close-on-click-modal="false" width="30%">
-      <el-form :model="uDictForm" :label-width="formLabelWidth">
+      <el-form :model="uDictForm" :rules="updateDictRules" ref="updateDictForm" :label-width="formLabelWidth">
         <el-form-item label="字典名称">
           <el-input v-model="uDictForm.dName" :readonly="true"></el-input>
         </el-form-item>
         <el-form-item label="标识符">
           <el-input v-model="uDictForm.dClassify" :readonly="true"></el-input>
         </el-form-item>
-        <el-form-item label="显示值">
+        <el-form-item label="显示值" prop="dTitle">
           <el-input v-model="uDictForm.dTitle"></el-input>
         </el-form-item>
-        <el-form-item label="实际值">
+        <el-form-item label="实际值" prop="dCode">
           <el-input v-model="uDictForm.dCode"></el-input>
         </el-form-item>
         <el-form-item label="排序">
@@ -154,7 +153,7 @@
       </el-form>
       <div slot="footer">
         <el-button @click="uDictDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="saveDict('update')">确 定</el-button>
+        <el-button type="primary" @click="saveDict('updateDictForm')">确 定</el-button>
       </div>
     </el-dialog>
   </section>
@@ -173,13 +172,23 @@
           pageSize: 10
         },
         dictOptions: {
-          sf: []
+          sf: this.$store.state.dictList.filter(o => o.dClassify === 'SF')
         },
         dictForm: {
           id: null,
           dName: '',
           dClassify: '',
           items: [{dCode: '', dTitle: '', dOrder: '', isable: '', remark: ''}]
+        },
+        addDictRules: {
+          dName: [
+            { required: true, message: '请输入字典名称' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          dClassify: [
+            { required: true, message: '请输入标识符' },
+            { min: 1, max: 20, message: '长度在 1 到 20 个字符' }
+          ]
         },
         dictDialogVisible: false,
         formLabelWidth: '80px',
@@ -193,16 +202,21 @@
           isable: '',
           remark: ''
         },
+        updateDictRules: {
+          dTitle: [
+            { required: true, message: '请输入显示值' },
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符' }
+          ],
+          dCode: [
+            { required: true, message: '请输入实际值' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ]
+        },
         uDictDialogVisible: false
       }
     },
     created () {
-      let me = this
       this.fetchData()
-      // 获取下拉字典：是否可用
-      common.getDictList({dClassify: 'SF'}, function (data) {
-        me.dictOptions.sf = data.page.rows
-      })
     },
     methods: {
       getDictList () {
@@ -225,68 +239,83 @@
       },
       addDict () {
         this.dictDialogVisible = true
-        this.dictForm.id = null
-        this.dictForm.dName = ''
-        this.dictForm.dClassify = ''
-        this.dictForm.items = [{dCode: '', dTitle: '', dOrder: '', isable: '', remark: ''}]
+        this.$nextTick(function () {
+          this.$refs['addDictForm'].resetFields()
+          this.dictForm.id = null
+          this.dictForm.dName = ''
+          this.dictForm.dClassify = ''
+          this.dictForm.items = [{dCode: '', dTitle: '', dOrder: '', isable: '1', remark: ''}]
+        })
       },
       removeItem (item) {
-        var index = this.dictForm.items.indexOf(item)
+        let index = this.dictForm.items.indexOf(item)
         if (index !== -1) {
           this.dictForm.items.splice(index, 1)
         }
       },
       addItem () {
-        this.dictForm.items.push({dCode: '', dTitle: '', dOrder: '', isable: '', remark: ''})
+        this.dictForm.items.push({dCode: '', dTitle: '', dOrder: '', isable: '1', remark: ''})
       },
-      saveDict (type) {
+      saveDict (formName) {
         let me = this
-        let arr = []
-        if (type === 'add') {
-          if (this.dictForm.items.length > 0) {
-            this.dictForm.items.forEach((item, index) => {
-              arr.push({
-                id: null,
-                dName: this.dictForm.dName,
-                dClassify: this.dictForm.dClassify,
-                dCode: item.dCode,
-                dTitle: item.dTitle,
-                dOrder: item.dOrder,
-                isable: item.isable,
-                remark: item.remark
-              })
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            let arr = []
+            if (formName === 'addDictForm') {
+              if (this.dictForm.items.length > 0) {
+                this.dictForm.items.forEach((item, index) => {
+                  arr.push({
+                    id: null,
+                    dName: this.dictForm.dName,
+                    dClassify: this.dictForm.dClassify,
+                    dCode: item.dCode,
+                    dTitle: item.dTitle,
+                    dOrder: item.dOrder,
+                    isable: item.isable,
+                    remark: item.remark
+                  })
+                })
+              } else {
+                arr.push({
+                  id: null,
+                  dName: this.dictForm.dName,
+                  dClassify: this.dictForm.dClassify,
+                  dCode: '',
+                  dTitle: '',
+                  dOrder: '',
+                  isable: '',
+                  remark: ''
+                })
+              }
+            } else {
+              arr.push(this.uDictForm)
+            }
+            api.saveDict(arr, function (data) {
+              me.dictDialogVisible = false
+              me.uDictDialogVisible = false
+              me.fetchData()
+              // 更新store中的字典数据
+              me.$store.commit('getAllDict')
             })
           } else {
-            arr.push({
-              id: null,
-              dName: this.dictForm.dName,
-              dClassify: this.dictForm.dClassify,
-              dCode: '',
-              dTitle: '',
-              dOrder: '',
-              isable: '',
-              remark: ''
-            })
+            console.log('表单校验失败！')
+            return false
           }
-        } else {
-          arr.push(this.uDictForm)
-        }
-        api.saveDict(arr, function (data) {
-          me.dictDialogVisible = false
-          me.uDictDialogVisible = false
-          me.fetchData()
         })
       },
       updateDict (row) {
         this.uDictDialogVisible = true
-        this.uDictForm.id = row.id
-        this.uDictForm.dName = row.dName
-        this.uDictForm.dClassify = row.dClassify
-        this.uDictForm.dCode = row.dCode
-        this.uDictForm.dTitle = row.dTitle
-        this.uDictForm.dOrder = row.dOrder
-        this.uDictForm.isable = row.isable
-        this.uDictForm.remark = row.remark
+        this.$nextTick(function () {
+          this.$refs['updateDictForm'].resetFields()
+          this.uDictForm.id = row.id
+          this.uDictForm.dName = row.dName
+          this.uDictForm.dClassify = row.dClassify
+          this.uDictForm.dCode = row.dCode
+          this.uDictForm.dTitle = row.dTitle
+          this.uDictForm.dOrder = row.dOrder
+          this.uDictForm.isable = row.isable
+          this.uDictForm.remark = row.remark
+        })
       },
       delDict (id) {
         let me = this
@@ -297,6 +326,8 @@
         }).then(() => {
           api.delDict({id: id}, function (data) {
             me.fetchData()
+            // 更新store中的字典数据
+            me.$store.commit('getAllDict')
           })
         }).catch(() => {
           me.$message({
@@ -322,7 +353,7 @@
   .icon-removeDictItem {
     color: orangered;
     font-size: 24px;
-    margin-top: 30px;
+    line-height: 84px;
     margin-left: 10px;
     opacity: .7;
     &:hover {

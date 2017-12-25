@@ -11,15 +11,13 @@
         background-color="#545c64"
         text-color="#fff"
         active-text-color="#ffd04b">
-        <el-menu-item index="settings">系统设置</el-menu-item>
-        <el-menu-item index="processing">处理中心</el-menu-item>
-        <el-menu-item index="3">我的工作台</el-menu-item>
-        <el-menu-item index="4">订单管理</el-menu-item>
+        <el-menu-item v-for="m in menuList" :index="m.url" :key="m.url">{{m.label}}</el-menu-item>
       </el-menu>
       <div class="sysUser">
         <el-dropdown @command="handleCommand">
-          <span class="el-dropdown-link">
-            <i class="el-icon-setting" style="margin-right: 5px"></i><span>{{userName}}</span>
+          <span class="el-dropdown-link userinfo-inner">
+            <img :src="userInfo.headImg">
+            {{userInfo.name}}
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="message">消息中心</el-dropdown-item>
@@ -50,14 +48,17 @@
     <el-container>
       <el-aside style="background-color: #545c64;">
         <el-menu :default-active="leftActiveIndex" @select="leftHandleSelect" ref="leftMenu" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" style="border-right-color: #545c64">
-          <template v-for="(item, index1) in routesArr" v-if="!item.hidden">
-            <el-submenu v-if="item.children" :index="item.path+index1" :key="index1">
-              <template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
-              <el-menu-item v-for="(child, index2) in item.children" v-if="!child.hidden" :index="item.path+child.path" :key="index1+'-'+index2">
-                <i :class="child.iconCls"></i>{{child.name}}
-              </el-menu-item>
-            </el-submenu>
-            <el-menu-item v-else :index="item.path" :key="index1"><i :class="item.iconCls"></i>{{item.name}}</el-menu-item>
+          <!--<template v-for="(item, index1) in routesArr" v-if="!item.hidden">-->
+          <!--<el-submenu v-if="item.children" :index="item.path+index1" :key="index1">-->
+          <!--<template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>-->
+          <!--<el-menu-item v-for="(child, index2) in item.children" v-if="!child.hidden" :index="item.path+child.path" :key="index1+'-'+index2">-->
+          <!--<i :class="child.iconCls"></i>{{child.name}}-->
+          <!--</el-menu-item>-->
+          <!--</el-submenu>-->
+          <!--<el-menu-item v-else :index="item.path" :key="index1"><i :class="item.iconCls"></i>{{item.name}}</el-menu-item>-->
+          <!--</template>-->
+          <template v-for="item in subMenuList">
+            <el-menu-item :index="item.url" :key="item.url"><i :class="item.icon?'fa fa-'+item.icon+' shine-menu-icon':'el-icon-menu'"></i>{{item.label}}</el-menu-item>
           </template>
         </el-menu>
       </el-aside>
@@ -72,7 +73,7 @@
           </el-tab-pane>
         </el-tabs>
         <!--<keep-alive>-->
-          <router-view></router-view>
+        <router-view></router-view>
         <!--</keep-alive>-->
       </el-main>
     </el-container>
@@ -81,7 +82,10 @@
 
 <script>
   import common from '../utils/common'
-//  import home from '../api/home'
+  import { logout } from '../api/login'
+  import home from '../api/home'
+  import defaultHeadImg from '@/assets/headImg.jpg'
+
   export default {
 //    name: 'home',
     data () {
@@ -105,7 +109,72 @@
         }
       }
       return {
-        userName: common.getUserName(),
+        menuList: [
+          {
+            label: '系统设置',
+            url: 'settings',
+            icon: 'el-icon-menu',
+            children: [
+              {
+                label: '菜单管理',
+                url: 'menu',
+                icon: 'fa fa-arrows shine-menu-icon'
+              },
+              {
+                label: '资源管理',
+                url: 'resource',
+                icon: 'el-icon-setting'
+              },
+              {
+                label: '角色管理',
+                url: 'role',
+                icon: 'el-icon-setting'
+              },
+              {
+                label: '部门管理',
+                url: 'dept',
+                icon: 'el-icon-setting'
+              },
+              {
+                label: '用户管理',
+                url: 'user',
+                icon: 'el-icon-setting'
+              },
+              {
+                label: '字典管理',
+                url: 'dict',
+                icon: 'el-icon-setting'
+              }
+            ]
+          },
+          {
+            label: '处理中心',
+            url: 'processing',
+            icon: 'el-icon-menu',
+            children: [
+              {
+                label: 'Form 表单',
+                url: 'form',
+                icon: 'el-icon-setting'
+              },
+              {
+                label: 'scss',
+                url: 'scss',
+                icon: 'el-icon-setting'
+              },
+              {
+                label: 'echarts',
+                url: 'echarts',
+                icon: 'el-icon-setting'
+              }
+            ]
+          }
+        ],
+        subMenuList: [],
+        userInfo: {
+          name: common.getUserInfo().name,
+          headImg: common.getUserInfo().headUrl ? process.env.BASE_URL + common.getUserInfo().headUrl : defaultHeadImg
+        },
         topActiveIndex: 'settings',
         leftActiveIndex: '',
         routesArr: [],
@@ -131,83 +200,71 @@
       }
     },
     created () {
-      this.topHandleSelect('settings')
+//      console.log(this.$router)
+//      console.log(this.$router.currentRoute)
+      let me = this
+      home.getMenuListByUid(null, function (data) {
+        me.menuList = data.list
+        if (me.$router.currentRoute.path === '/') {
+          me.topHandleSelect('settings')
+        } else {
+          me.topHandleSelect(me.$router.currentRoute.meta.groupName, me.$router.currentRoute.path.substring(1))
+        }
+      })
+      this.$store.commit('getAllDict')
     },
     methods: {
-      topHandleSelect (key) {
-//        console.log(this.$router.options.routes)
-//        console.log(this.$refs)
-        let routes = this.$router.options.routes
-        this.routesArr.splice(0)
-        for (let i in routes) {
-          if (routes[i].groupName && routes[i].groupName === key) {
-            this.routesArr.push(routes[i])
+      topHandleSelect (key, path) {
+        for (let i in this.menuList) {
+          if (this.menuList[i].url === key) {
+            this.subMenuList = this.menuList[i].children
+            break
           }
         }
+
+//        let routes = this.$router.options.routes
+//        this.routesArr.splice(0)
+//        for (let i in routes) {
+//          if (routes[i].groupName && routes[i].groupName === key) {
+//            this.routesArr = routes[i].children
+//          }
+//        }
         // 清空tab页数组
         this.editableTabs = []
-        if (this.routesArr.length > 0) {
-          if (this.routesArr[0].children) {
-//            this.$refs['leftMenu'].open(this.routesArr[0].path + '0')
-//            this.leftActiveIndex = this.routesArr[0].path + this.routesArr[0].children[0].path
-//            this.$router.push({ path: this.routesArr[0].path + this.routesArr[0].children[0].path })
-            this.leftHandleSelect(this.routesArr[0].path + this.routesArr[0].children[0].path)
+//        if (this.routesArr.length > 0) {
+//          if (this.routesArr[0].children) {
+//            this.leftHandleSelect(this.routesArr[0].path + this.routesArr[0].children[0].path)
+//          } else {
+//            this.leftHandleSelect(this.routesArr[0].path)
+//          }
+//        }
+        if (this.subMenuList.length > 0) {
+          if (path) {
+            this.leftActiveIndex = path
+            this.editableTabs.push({
+              title: this.$router.currentRoute.name,
+              name: path
+            })
+            this.editableTabsValue = path
           } else {
-//            this.leftActiveIndex = this.routesArr[0].path
-//            this.$router.push({ path: this.routesArr[0].path })
-            this.leftHandleSelect(this.routesArr[0].path)
+            this.leftHandleSelect(this.subMenuList[0].url)
           }
         }
       },
       leftHandleSelect (key) {
-//        console.log(this.routesArr)
-        let tabTitle = ''
-//        this.routesArr.forEach((route, index) => {
-//          if (route.children) {
-//            route.children.forEach((item, index) => {
-//              if (key.indexOf(item.path)) {
-//                tabTitle = item.name
-//              }
-//            })
-//          }
-//        })
-        if (key === '/menu') {
-          tabTitle = '菜单管理'
-        } else if (key === '/role') {
-          tabTitle = '角色管理'
-        } else if (key === '/grid') {
-          tabTitle = 'Table 表格'
-        } else if (key === '/form') {
-          tabTitle = 'Form 表单'
-        } else if (key === '/scss') {
-          tabTitle = 'scss'
-        } else if (key === '/echarts') {
-          tabTitle = 'echarts'
-        } else if (key === '/resource') {
-          tabTitle = '资源管理'
-        } else if (key === '/dept') {
-          tabTitle = '部门管理'
-        } else if (key === '/user') {
-          tabTitle = '用户管理'
-        } else if (key === '/dict') {
-          tabTitle = '字典管理'
-        }
-        let tabs = this.editableTabs
-        let isExist = false
-        tabs.forEach((tab, index) => {
-          if (tab.name === key) {
-            isExist = true
+        let me = this
+        this.$router.push({path: key}, function (res) {
+          me.leftActiveIndex = key
+          let tabs = me.editableTabs
+          let index = tabs.findIndex(tab => tab.name === key)
+          if (index === -1) {
+            tabs.push({
+              title: res.name,
+              name: key
+            })
           }
+          me.editableTabsValue = key
         })
-        if (!isExist) {
-          tabs.push({
-            title: tabTitle,
-            name: key
-          })
-        }
-        this.editableTabsValue = key
-        this.leftActiveIndex = key
-        this.$router.push({path: key})
       },
       removeTab (targetName) {
         let tabs = this.editableTabs
@@ -232,12 +289,16 @@
         this.$router.push({path: tab.name})
       },
       handleCommand (command) {
+        let me = this
         switch (command) {
           case 'message':
             this.$message('click on item ' + command)
             break
           case 'modifyPwd':
             this.pwdDialogVisible = true
+            this.$nextTick(function () {
+              this.$refs['pwdForm'].resetFields()
+            })
             break
           case 'logout':
             this.$confirm('确定要退出系统吗?', '系统提示', {
@@ -245,13 +306,15 @@
               cancelButtonText: '取消',
               type: 'warning'
             }).then(() => {
-              this.$router.push({ path: '/login' })
-              this.$message({
-                type: 'success',
-                message: '退出成功!'
+              logout(null, function (data) {
+                me.$router.push({ path: '/login' })
+                me.$message({
+                  type: 'success',
+                  message: '退出成功!'
+                })
               })
             }).catch(() => {
-              this.$message({
+              me.$message({
                 type: 'info',
                 message: '已取消退出'
               })
@@ -266,9 +329,10 @@
         let me = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
-//            home.modifyPwd(this.pwdForm, function (data) {
-            me.pwdDialogVisible = false
-//            })
+            let params = {newPassword: this.pwdForm.newPwd, oldPassword: this.pwdForm.oldPwd}
+            home.modifyPwd(params, function (data) {
+              me.pwdDialogVisible = false
+            })
           } else {
             return false
           }
@@ -290,23 +354,30 @@
   }
   .el-menu-top {
     float: left;
-    width: calc(100% - 280px - 60px);
+    width: calc(100% - 280px - 100px);
   }
   .sysUser {
     float: right;
-    width: 60px;
+    width: 100px;
     text-align: right;
-    .el-dropdown-link {
-      cursor: pointer;
-      color: #409EFF;
-    }
+  .userinfo-inner {
+    cursor: pointer;
+    color: #409EFF;
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    margin: 10px 0 10px 10px;
+    float: right;
+  }
+  }
   }
   /*.el-aside {*/
-    /*color: #333;*/
+  /*color: #333;*/
   /*}*/
   /*.tabsCls {*/
-    /*.el-tabs__content {*/
-      /*height: calc(100% - 56px);*/
-    /*}*/
+  /*.el-tabs__content {*/
+  /*height: calc(100% - 56px);*/
+  /*}*/
   /*}*/
 </style>

@@ -5,7 +5,7 @@
         <el-input v-model="userFilter.uUsername" placeholder="请输入工号\姓名\登录名"></el-input>
       </el-form-item>
       <el-form-item label="所属部门">
-        <el-input v-model="userFilter.uDeptName" placeholder="请选择" :readonly="true">
+        <el-input v-model="userFilter.deptName" placeholder="请选择" :readonly="true">
           <el-button slot="append" icon="el-icon-search" @click="openSelectDeptDialog"></el-button>
         </el-input>
       </el-form-item>
@@ -15,13 +15,13 @@
       </el-form-item>
     </el-form>
     <el-table :data="tableData" height="'auto'" size="small" border stripe style="height: calc((100% - 51px) - 32px)">
-      <el-table-column prop="uAccount" label="工号" width="180" header-align="center">
+      <el-table-column prop="uAccount" label="工号" width="140" header-align="center">
       </el-table-column>
-      <el-table-column prop="uName" label="姓名" width="120" header-align="center">
+      <el-table-column prop="uName" label="姓名" width="140" header-align="center">
       </el-table-column>
-      <el-table-column prop="uUsername" label="登录名" width="120" header-align="center">
+      <el-table-column prop="uUsername" label="登录名" width="140" header-align="center">
       </el-table-column>
-      <el-table-column prop="deptName" label="所属部门" width="120" header-align="center">
+      <el-table-column prop="deptName" label="所属部门" width="180" header-align="center">
       </el-table-column>
       <el-table-column prop="uTel" label="联系电话" width="120" header-align="center" align="center">
       </el-table-column>
@@ -68,7 +68,7 @@
     </el-dialog>
     <!--用户基本信息dialog-->
     <el-dialog :title="userDialogTitle" :visible.sync="userDialogVisible" :close-on-click-modal="false" width="35%">
-      <el-form :model="userForm" :label-width="formLabelWidth">
+      <el-form :model="userForm" :rules="userRules" ref="userForm" label-width="110px">
         <el-form-item label="头像">
           <el-upload
             class="avatar-uploader"
@@ -77,30 +77,30 @@
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload">
-            <img v-if="userForm.uHeadUrl" :src="userForm.uHeadUrl" class="avatar">
+            <img v-if="userForm.uHeadUrl" :src="userForm.imageUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
-          <el-button type="text" :disabled="!userForm.uHeadUrl" @click="userForm.uHeadUrl = ''" style="margin-top: 15px; margin-left: 8px;">清除</el-button>
+          <el-button type="text" v-if="userForm.uHeadUrl" @click="userForm.uHeadUrl = '';userForm.imageUrl = ''" style="margin-top: 15px; margin-left: 8px;">清除</el-button>
         </el-form-item>
         <el-form-item label="工号">
-          <el-input v-model="userForm.uAccount" :readonly="true"></el-input>
+          <el-input v-model="userForm.uAccount" :readonly="true" placeholder="由后台生成"></el-input>
         </el-form-item>
-        <el-form-item label="姓名">
-          <el-input v-model="userForm.uName" auto-complete="off"></el-input>
+        <el-form-item label="姓名" prop="uName">
+          <el-input v-model="userForm.uName"></el-input>
         </el-form-item>
-        <el-form-item label="登录名">
+        <el-form-item label="登录名" prop="uUsername">
           <el-input v-model="userForm.uUsername"></el-input>
         </el-form-item>
-        <el-form-item label="助记码">
+        <el-form-item label="助记码" prop="uInputCode">
           <el-input v-model="userForm.uInputCode"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱">
+        <el-form-item label="邮箱" prop="uEmail">
           <el-input v-model="userForm.uEmail"></el-input>
         </el-form-item>
-        <el-form-item label="电话">
+        <el-form-item label="电话" prop="uTel">
           <el-input v-model="userForm.uTel"></el-input>
         </el-form-item>
-        <el-form-item label="用户类型">
+        <el-form-item label="用户类型" prop="uType">
           <el-select v-model="userForm.uType" placeholder="请选择">
             <el-option
               v-for="item in dictOptions.userType"
@@ -110,7 +110,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="是否允许登录">
+        <el-form-item label="是否允许登录" prop="isable">
           <el-select v-model="userForm.isable" placeholder="请选择">
             <el-option
               v-for="item in dictOptions.sf"
@@ -120,7 +120,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="userForm.remark" type="textarea" :rows="2" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
@@ -147,11 +147,11 @@
     </el-dialog>
     <!--角色权限dialog-->
     <el-dialog title="角色权限" :visible.sync="roleAuthDialogVisible" :close-on-click-modal="false">
-      <el-table :data="roleData" height="400" size="small" border stripe ref="roleTable">
+      <el-table :data="roleData" height="400" size="small" border stripe ref="roleTable" @select="selectRes" @select-all="selectAllRes">
         <el-table-column type="selection" width="55" header-align="center" align="center"></el-table-column>
-        <el-table-column prop="rName" label="角色名称" width="180" header-align="center">
+        <el-table-column prop="rName" label="角色名称" width="150" header-align="center">
         </el-table-column>
-        <el-table-column prop="rEname" label="英文名称" width="180" header-align="center">
+        <el-table-column prop="rEname" label="英文名称" width="150" header-align="center">
         </el-table-column>
         <el-table-column prop="type" label="角色类型" width="120" header-align="center">
         </el-table-column>
@@ -189,18 +189,19 @@
         userFilter: {
           uUsername: '',
           uDeptId: '',
-          uDeptName: '',
+          deptName: '',
           currentPage: 1,
           pageSize: 10
         },
         dictOptions: {
-          sf: [],
-          userType: []
+          sf: this.$store.state.dictList.filter(o => o.dClassify === 'SF'),
+          userType: this.$store.state.dictList.filter(o => o.dClassify === 'USER_TYPE')
         },
         filterText: '',
         selectDeptDialogVisible: false,
         userForm: {
           id: null,
+          imageUrl: '',
           uHeadUrl: '',
           uAccount: '',
           uName: '',
@@ -212,10 +213,41 @@
           isable: '',
           remark: ''
         },
+        userRules: {
+          uName: [
+            { required: true, message: '请输入姓名' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          uUsername: [
+            { required: true, message: '请输入登录名' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          uInputCode: [
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          uEmail: [
+            { type: 'email', message: '请输入格式正确的邮箱' }
+          ],
+          uTel: [
+            { pattern: /^(1[34578]\d{9})|(0\d{2}-\d{8})|(0\d{3}-\d{7})$/, message: '请输入格式正确的手机或电话号码' }
+          ],
+          uType: [
+            { required: true, message: '请选择用户类型', trigger: 'change' }
+          ],
+          isable: [
+            { required: true, message: '请选择是否允许登录', trigger: 'change' }
+          ],
+          remark: [
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符' }
+          ]
+        },
         userDialogVisible: false,
         userDialogTitle: '',
-        formLabelWidth: '100px',
         treeData: [],
+        deptNodeObj: {
+          nodeIds: [],
+          leafNodeIds: []
+        },
         defaultProps: {
           children: 'children',
           label: 'dName'
@@ -231,27 +263,13 @@
           pageSize: 10
         },
         userRoleAuthIds: [],
-        roleAuthDialogVisible: false
-      }
-    },
-    computed: {
-      fileUploadPath: function () {
-        return this.$store.state.fileUploadPath
-      },
-      defaultPassword: function () {
-        return this.$store.state.defaultPassword
+        roleAuthDialogVisible: false,
+        fileUploadPath: common.constObj.fileUploadPath,
+        defaultPassword: common.constObj.defaultPassword
       }
     },
     created () {
-      let me = this
       this.fetchData()
-      // 获取下拉字典：是否可用、用户类型
-      common.getDictList({dClassify: 'SF'}, function (data) {
-        me.dictOptions.sf = data.page.rows
-      })
-      common.getDictList({dClassify: 'USER_TYPE'}, function (data) {
-        me.dictOptions.userType = data.page.rows
-      })
     },
     watch: {
       filterText (val) {
@@ -304,52 +322,69 @@
               type: 'warning'
             })
           } else {
-            this.userFilter.uDeptName = currentNode.dName
-            this.userFilter.uDeptId = currentNode.dCode
+            this.userFilter.deptName = currentNode.dName
+            this.userFilter.uDeptId = currentNode.id
             this.selectDeptDialogVisible = false
           }
         } else {
-          this.$message({
-            message: '请先选择一个子节点',
-            type: 'warning'
-          })
+//          this.$message({
+//            message: '请先选择一个子节点',
+//            type: 'warning'
+//          })
+          this.userFilter.deptName = ''
+          this.userFilter.uDeptId = ''
+          this.selectDeptDialogVisible = false
         }
       },
       addUser () {
-        this.userDialogTitle = '新增用户'
         this.userDialogVisible = true
-        this.userForm.id = null
-        this.userForm.uHeadUrl = ''
-        this.userForm.uAccount = ''
-        this.userForm.uName = ''
-        this.userForm.uUsername = ''
-        this.userForm.uInputCode = ''
-        this.userForm.uEmail = ''
-        this.userForm.uTel = ''
-        this.userForm.uType = ''
-        this.userForm.isable = ''
-        this.userForm.remark = ''
+        this.userDialogTitle = '新增用户'
+        this.$nextTick(function () {
+          this.$refs['userForm'].resetFields()
+          this.userForm.id = null
+          this.userForm.imageUrl = ''
+          this.userForm.uHeadUrl = ''
+          this.userForm.uAccount = ''
+          this.userForm.uName = ''
+          this.userForm.uUsername = ''
+          this.userForm.uInputCode = ''
+          this.userForm.uEmail = ''
+          this.userForm.uTel = ''
+          this.userForm.uType = ''
+          this.userForm.isable = ''
+          this.userForm.remark = ''
+        })
       },
       updateUser (row) {
-        this.userDialogTitle = '修改用户'
         this.userDialogVisible = true
-        this.userForm.id = row.id
-        this.userForm.uHeadUrl = row.uHeadUrl
-        this.userForm.uAccount = row.uAccount
-        this.userForm.uName = row.uName
-        this.userForm.uUsername = row.uUsername
-        this.userForm.uInputCode = row.uInputCode
-        this.userForm.uEmail = row.uEmail
-        this.userForm.uTel = row.uTel
-        this.userForm.uType = row.uType
-        this.userForm.isable = row.isable
-        this.userForm.remark = row.remark
+        this.userDialogTitle = '修改用户'
+        this.$nextTick(function () {
+          this.$refs['userForm'].resetFields()
+          this.userForm.id = row.id
+          this.userForm.imageUrl = process.env.BASE_URL + row.uHeadUrl
+          this.userForm.uHeadUrl = row.uHeadUrl
+          this.userForm.uAccount = row.uAccount
+          this.userForm.uName = row.uName
+          this.userForm.uUsername = row.uUsername
+          this.userForm.uInputCode = row.uInputCode
+          this.userForm.uEmail = row.uEmail
+          this.userForm.uTel = row.uTel
+          this.userForm.uType = row.uType
+          this.userForm.isable = row.isable
+          this.userForm.remark = row.remark
+        })
       },
       saveUser () {
         let me = this
-        api.saveUser(this.userForm, function (data) {
-          me.userDialogVisible = false
-          me.fetchData()
+        this.$refs['userForm'].validate((valid) => {
+          if (valid) {
+            api.saveUser(this.userForm, function (data) {
+              me.userDialogVisible = false
+              me.fetchData()
+            })
+          } else {
+            return false
+          }
         })
       },
       delUser (id) {
@@ -370,7 +405,8 @@
         })
       },
       handleAvatarSuccess (res, file) {
-        this.userForm.uHeadUrl = URL.createObjectURL(file.raw)
+        this.userForm.imageUrl = URL.createObjectURL(file.raw)
+        this.userForm.uHeadUrl = res.obj.fileUrl
       },
       beforeAvatarUpload (file) {
 //        const isJPG = file.type === 'image/jpeg'
@@ -403,22 +439,62 @@
       openDeptAuthDialog (id) {
         this.currentUserId = id
         let me = this
-        // 获取可见菜单列表
+        // 获取可见部门列表
         deptApi.getDeptList({isable: '1'}, function (data) {
           me.treeData = data.list
-          // 获取角色菜单权限列表
+          // 获取用户部门权限列表
           api.getUserDeptAuth({uid: id}, function (data) {
-            me.$refs.deptTree.setCheckedKeys(data.list)
+            // 清空数组
+            me.deptNodeObj.leafNodeIds = []
+            // 获取树中所有叶子节点
+            me.findLeafNodeIds(me.treeData)
+            let set1 = new Set(me.deptNodeObj.leafNodeIds)
+            let set2 = new Set(data.list)
+            // 取交集
+            let intersect = new Set([...set1].filter(x => set2.has(x)))
+            me.$refs.deptTree.setCheckedKeys(Array.from(intersect))
           })
         })
         this.deptAuthDialogVisible = true
       },
+      findLeafNodeIds (arr) {
+        arr.forEach(node => {
+          if (node.children.length === 0) {
+            this.deptNodeObj.leafNodeIds.push(node.id)
+          } else {
+            this.findLeafNodeIds(node.children)
+          }
+        })
+      },
       saveDeptAuth () {
         let me = this
-        api.saveUserDeptAuth({id: this.currentUserId, ids: this.$refs.deptTree.getCheckedKeys()}, function (data) {
+        let checkedKeys = this.$refs.deptTree.getCheckedKeys()
+        // 清空数组
+        this.deptNodeObj.nodeIds = []
+        checkedKeys.forEach(id => {
+          this.treeData.forEach(node => {
+            this.findNodeId(node, id)
+          })
+        })
+        api.saveUserDeptAuth({id: this.currentUserId, ids: Array.from(new Set(this.deptNodeObj.nodeIds))}, function (data) {
           me.deptAuthDialogVisible = false
           me.fetchData()
         })
+      },
+      findNodeId (node, id) {
+        if (node.id === id) {
+          this.deptNodeObj.nodeIds.push(id)
+          return true
+        }
+        if (node.children.length > 0) {
+          node.children.forEach(n => {
+            if (this.findNodeId(n, id)) {
+              this.deptNodeObj.nodeIds.push(node.id)
+              return true
+            }
+          })
+        }
+        return false
       },
       openRoleAuthDialog (id) {
         this.currentUserId = id
@@ -443,11 +519,7 @@
       },
       saveRoleAuth () {
         let me = this
-        let roleIds = []
-        this.$refs.roleTable.selection.forEach(row => {
-          roleIds.push(row.id)
-        })
-        api.saveUserRoleAuth({id: this.currentUserId, ids: roleIds}, function (data) {
+        api.saveUserRoleAuth({id: this.currentUserId, ids: this.userRoleAuthIds}, function (data) {
           me.roleAuthDialogVisible = false
         })
       },
@@ -466,14 +538,42 @@
           me.roleData = data.page.rows
           me.roleDataTotal = data.page.total
           // 回显角色资源权限
-          me.roleData.forEach(row => {
-            me.userRoleAuthIds.forEach(id => {
-              if (row.id === id) {
-                me.$refs.roleTable.toggleRowSelection(row)
-              }
+          me.$nextTick(function () {
+            me.roleData.forEach(row => {
+              me.userRoleAuthIds.forEach(id => {
+                if (row.id === id) {
+                  me.$refs.roleTable.toggleRowSelection(row)
+                }
+              })
             })
           })
         })
+      },
+      selectRes (selection, row) {
+        let index = this.userRoleAuthIds.findIndex(id => id === row.id)
+        if (index !== -1) {
+          this.userRoleAuthIds.splice(index, 1)
+        } else {
+          this.userRoleAuthIds.push(row.id)
+        }
+      },
+      selectAllRes (selection) {
+        // 全部选中
+        if (selection.length > 0) {
+          selection.forEach(row => {
+            let index = this.userRoleAuthIds.findIndex(id => id === row.id)
+            if (index === -1) {
+              this.userRoleAuthIds.push(row.id)
+            }
+          })
+        } else { // 全部取消选中
+          this.resourceData.forEach(row => {
+            let index = this.userRoleAuthIds.findIndex(id => id === row.id)
+            if (index !== -1) {
+              this.userRoleAuthIds.splice(index, 1)
+            }
+          })
+        }
       }
     }
   }

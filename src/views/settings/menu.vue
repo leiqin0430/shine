@@ -18,20 +18,21 @@
     </el-tree>
     <!--新增/修改菜单Dialog-->
     <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-form :model="form" :label-width="formLabelWidth">
+      <el-form :model="form" :rules="menuRules" ref="menuForm" label-width="100px">
         <el-form-item label="上级菜单">
-          <el-input v-model="form.parentLabel" auto-complete="off" :readonly="true"></el-input>
+          <el-input v-model="form.parentLabel" :readonly="true"></el-input>
         </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="form.label" auto-complete="off" :autofocus="true"></el-input>
+        <el-form-item label="名称" prop="label">
+          <el-input v-model="form.label"></el-input>
         </el-form-item>
         <el-form-item label="链接">
-          <el-input v-model="form.url" auto-complete="off"></el-input>
+          <el-input v-model="form.url"></el-input>
         </el-form-item>
         <el-form-item label="图标">
-          <span :class="'fa fa-'+form.icon"></span>
+          <span v-if="form.icon" :class="'fa fa-'+form.icon"></span>
           <span>{{form.icon ? form.icon : '无'}}</span>
           <el-button @click="tempIcon = form.icon; innerIconVisible = true">选 择</el-button>
+          <el-button type="text" v-if="form.icon" @click="form.icon = ''; tempIcon = ''">清除</el-button>
         </el-form-item>
         <el-form-item label="排序">
           <el-input-number v-model="form.order" controls-position="right"></el-input-number>
@@ -42,7 +43,7 @@
             <el-radio :label="'2'">隐藏</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
@@ -101,7 +102,15 @@
           visible: '',
           remark: ''
         },
-        formLabelWidth: '100px',
+        menuRules: {
+          label: [
+            { required: true, message: '请输入菜单名称' },
+            { min: 1, max: 20, message: '长度在 1 到 20 个字符' }
+          ],
+          remark: [
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符' }
+          ]
+        },
         tempIcon: ''
       }
     },
@@ -117,7 +126,7 @@
         })
       },
       handleNodeClick () {
-        console.log('handleNodeClick')
+//        console.log('handleNodeClick')
       },
       renderContent (h, { node, data, store }) {
         let me = this
@@ -129,28 +138,26 @@
           h('el-button', {attrs: {size: 'mini', type: 'text'},
             on: {
               click: function (event) {
-//                  console.log('data', data)
-//                  console.log('node', node)
-//                  console.log('store', store)
                 me.dialogFormVisible = true
                 me.dialogTitle = '修改菜单'
-                me.form.parentLabel = node.parent.data.label
-                me.form.parentId = node.parent.data.id
-                me.form.id = data.id
-                me.form.label = data.label
-                me.form.url = data.url
-                me.form.icon = data.icon
-                me.form.order = data.order
-                me.form.visible = data.visible
-                me.form.remark = data.remark
+                me.$nextTick(function () {
+                  me.$refs['menuForm'].resetFields()
+                  me.form.parentLabel = node.parent.data.label
+                  me.form.parentId = node.parent.data.id
+                  me.form.id = data.id
+                  me.form.label = data.label
+                  me.form.url = data.url
+                  me.form.icon = data.icon
+                  me.form.order = data.order
+                  me.form.visible = data.visible
+                  me.form.remark = data.remark
+                })
                 event.stopPropagation()
               }
             }}, '修改'),
           h('el-button', {attrs: {size: 'mini', type: 'text'},
             on: {
               click: function (event) {
-                console.log('data', data)
-//                  store.remove(data)
                 let msg = (data.children.length > 0) ? '你确定要删除该菜单及其子菜单吗?' : '你确定要删除该菜单吗?'
                 me.$confirm(msg, '提示', {
                   confirmButtonText: '确定',
@@ -172,30 +179,10 @@
           h('el-button', {attrs: {size: 'mini', type: 'text'},
             on: {
               click: function (event) {
-//                  store.append({id: id++, label: 'new', children: []}, data)
                 me.dialogFormVisible = true
                 me.dialogTitle = '新增菜单'
-                me.form.parentLabel = data.label
-                me.form.parentId = data.id
-                me.form.id = null
-                me.form.label = ''
-                me.form.url = ''
-                me.form.icon = ''
-                me.form.order = 1
-                me.form.visible = '1'
-                me.form.remark = ''
-                event.stopPropagation()
-              }
-            }}, '添加下级菜单')
-        ]
-        if (node.level === 1) {
-          btnArr = [
-            h('el-button', {attrs: {size: 'mini', type: 'text'},
-              on: {
-                click: function (event) {
-//                  store.append({id: id++, label: 'new', children: []}, data)
-                  me.dialogFormVisible = true
-                  me.dialogTitle = '新增菜单'
+                me.$nextTick(function () {
+                  me.$refs['menuForm'].resetFields()
                   me.form.parentLabel = data.label
                   me.form.parentId = data.id
                   me.form.id = null
@@ -205,6 +192,30 @@
                   me.form.order = 1
                   me.form.visible = '1'
                   me.form.remark = ''
+                })
+                event.stopPropagation()
+              }
+            }}, '添加下级菜单')
+        ]
+        if (node.level === 1) {
+          btnArr = [
+            h('el-button', {attrs: {size: 'mini', type: 'text'},
+              on: {
+                click: function (event) {
+                  me.dialogFormVisible = true
+                  me.dialogTitle = '新增菜单'
+                  me.$nextTick(function () {
+                    me.$refs['menuForm'].resetFields()
+                    me.form.parentLabel = data.label
+                    me.form.parentId = data.id
+                    me.form.id = null
+                    me.form.label = ''
+                    me.form.url = ''
+                    me.form.icon = ''
+                    me.form.order = 1
+                    me.form.visible = '1'
+                    me.form.remark = ''
+                  })
                   event.stopPropagation()
                 }
               }}, '添加下级菜单')
@@ -220,9 +231,15 @@
       },
       saveMenu () {
         let me = this
-        api.saveMenu(this.form, function (data) {
-          me.dialogFormVisible = false
-          me.fetchData()
+        this.$refs['menuForm'].validate((valid) => {
+          if (valid) {
+            api.saveMenu(this.form, function (data) {
+              me.dialogFormVisible = false
+              me.fetchData()
+            })
+          } else {
+            return false
+          }
         })
       },
       getSelectedIcon (data) {
@@ -247,16 +264,16 @@
     text-align: center;
     border-top: 1px solid $border-color;
     border-right: 1px solid $border-color;
-    .col {
-      width: calc((100% - 25px - 180px) / 4);
-      border-left: 1px solid $border-color;
-    }
-    .col:first-of-type {
-      width: calc(((100% - 25px - 180px) / 4) + 24px)
-    }
-    .col:last-of-type {
-      width: 180px
-    }
+  .col {
+    width: calc((100% - 25px - 180px) / 4);
+    border-left: 1px solid $border-color;
+  }
+  .col:first-of-type {
+    width: calc(((100% - 25px - 180px) / 4) + 24px)
+  }
+  .col:last-of-type {
+    width: 180px
+  }
   }
   .menu-tree {
     border: 1px solid $border-color;

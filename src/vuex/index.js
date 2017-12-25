@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import common from '../utils/common'
 
 Vue.use(Vuex)
 
@@ -7,8 +8,7 @@ export default new Vuex.Store({
   state: {
     count: 2,
     AUTH_TOKEN: '',
-    fileUploadPath: process.env.BASE_URL + '/file/upload',
-    defaultPassword: '123456'
+    dictList: []
   },
   mutations: {
     increment: function (ss) {
@@ -19,6 +19,12 @@ export default new Vuex.Store({
     },
     setToken: function (state, token) {
       state.AUTH_TOKEN = token
+    },
+    getAllDict: function (ss) {
+      let _ss = ss
+      common.getDictList(null, function (data) {
+        _ss.dictList = data.page.rows
+      })
     }
   }
 })

@@ -22,7 +22,7 @@ axios.interceptors.request.use(function (config) {
   // })
 
   // Alter defaults after instance has been created
-  let user = JSON.parse(localStorage.getItem('user'))
+  let user = JSON.parse(localStorage.getItem('shine_user'))
   if (user) {
     config.headers['Authorization'] = user.token
   }
@@ -131,15 +131,15 @@ const shineHttp = cfg => {
   })
   // .catch(function (error) {
   //   console.log(error)
-    // // 请求异常
-    // if (error.response) {
-    //   checkStatus(error.response)
-    // } else {
-    //   Message({
-    //     type: 'error',
-    //     message: error.message
-    //   })
-    // }
+  // // 请求异常
+  // if (error.response) {
+  //   checkStatus(error.response)
+  // } else {
+  //   Message({
+  //     type: 'error',
+  //     message: error.message
+  //   })
+  // }
   // })
 }
 
@@ -149,10 +149,15 @@ const shineHttp = cfg => {
  */
 const checkStatus = resp => {
   switch (resp.status) {
+    case 401:
+      router.push({'path': '/login'})
+      break
     case 404:
       router.push({'path': '/404'})
       break
     case 403:
+      router.push({'path': '/403'})
+      break
     case 500:
     case 503:
     default:

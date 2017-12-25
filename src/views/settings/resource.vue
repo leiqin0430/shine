@@ -10,19 +10,22 @@
       </el-form-item>
     </el-form>
     <el-table :data="tableData" height="'auto'" size="small" border stripe style="height: calc((100% - 51px) - 32px)">
-      <el-table-column prop="rTitle" label="资源名称" width="180" header-align="center">
+      <el-table-column prop="rTitle" label="资源名称" width="240" header-align="center">
       </el-table-column>
-      <el-table-column prop="rUrl" label="资源地址" width="120" header-align="center">
+      <el-table-column prop="rUrl" label="资源地址" width="200" header-align="center">
       </el-table-column>
-      <el-table-column prop="rClass" label="类名" width="120" header-align="center">
+      <el-table-column prop="rClass" label="类名" width="300" header-align="center">
       </el-table-column>
-      <el-table-column prop="rMethod" label="方法名" width="120" header-align="center">
+      <el-table-column prop="rMethod" label="方法名" width="160" header-align="center">
       </el-table-column>
-      <el-table-column prop="isable" label="是否可用" width="120" header-align="center" align="center">
+      <el-table-column label="是否可用" width="80" header-align="center" align="center">
+        <template slot-scope="scope">
+          <span v-for="item in dictOptions.sf" v-if="item.dCode === scope.row.isable">{{item.dTitle}}</span>
+        </template>
       </el-table-column>
       <el-table-column prop="remark" label="备注" header-align="center" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column label="操作" width="200" header-align="center">
+      <el-table-column label="操作" width="150" header-align="center">
         <template slot-scope="scope">
           <el-popover
             ref="resourceLookPopover"
@@ -43,7 +46,7 @@
             </el-row>
             <el-row :gutter="10">
               <el-col :span="6" style="text-align: right;">是否可用：</el-col>
-              <el-col :span="18">{{scope.row.isable}}</el-col>
+              <el-col :span="18" v-for="item in dictOptions.sf" v-if="item.dCode === scope.row.isable" :key="item.dCode">{{item.dTitle}}</el-col>
             </el-row>
             <el-row :gutter="10">
               <el-col :span="6" style="text-align: right;">备注：</el-col>
@@ -67,17 +70,17 @@
     </el-pagination>
     <!--资源dialog-->
     <el-dialog :title="resourceDialogTitle" :visible.sync="resourceDialogVisible" :close-on-click-modal="false">
-      <el-form :model="resourceForm" :label-width="formLabelWidth">
-        <el-form-item label="资源名称">
+      <el-form :model="resourceForm" :rules="resourceRules" ref="resourceForm" label-width="100px">
+        <el-form-item label="资源名称" prop="rTitle">
           <el-input v-model="resourceForm.rTitle" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="资源地址">
+        <el-form-item label="资源地址" prop="rUrl">
           <el-input v-model="resourceForm.rUrl" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="类名">
+        <el-form-item label="类名" prop="rClass">
           <el-input v-model="resourceForm.rClass"></el-input>
         </el-form-item>
-        <el-form-item label="方法名">
+        <el-form-item label="方法名" prop="rMethod">
           <el-input v-model="resourceForm.rMethod"></el-input>
         </el-form-item>
         <el-form-item label="是否可用">
@@ -90,7 +93,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="resourceForm.remark" type="textarea" :rows="2" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
@@ -102,7 +105,7 @@
   </section>
 </template>
 <script>
-  import common from '../../utils/common'
+  //  import common from '../../utils/common'
   import api from '../../api/settings/resource'
   export default {
     data () {
@@ -115,7 +118,7 @@
           pageSize: 10
         },
         dictOptions: {
-          sf: []
+          sf: this.$store.state.dictList.filter(o => o.dClassify === 'SF')
         },
         resourceForm: {
           id: null,
@@ -126,18 +129,33 @@
           isable: '',
           remark: ''
         },
+        resourceRules: {
+          rTitle: [
+            { required: true, message: '请输入资源名称' },
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符' }
+          ],
+          rUrl: [
+            { required: true, message: '请输入资源地址' },
+            { min: 1, max: 100, message: '长度在 1 到 100 个字符' }
+          ],
+          rClass: [
+            { required: true, message: '请输入类名' },
+            { min: 1, max: 100, message: '长度在 1 到 100 个字符' }
+          ],
+          rMethod: [
+            { required: true, message: '请输入方法名' },
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符' }
+          ],
+          remark: [
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符' }
+          ]
+        },
         resourceDialogVisible: false,
-        resourceDialogTitle: '',
-        formLabelWidth: '100px'
+        resourceDialogTitle: ''
       }
     },
     created () {
-      let me = this
       this.fetchData()
-      // 获取下拉字典：是否可用
-      common.getDictList({dClassify: 'SF'}, function (data) {
-        me.dictOptions.sf = data.page.rows
-      })
     },
     methods: {
       getResourceList () {
@@ -159,32 +177,45 @@
         this.fetchData()
       },
       addResource () {
-        this.resourceDialogTitle = '新增资源'
         this.resourceDialogVisible = true
-        this.resourceForm.id = null
-        this.resourceForm.rTitle = ''
-        this.resourceForm.rUrl = ''
-        this.resourceForm.rClass = ''
-        this.resourceForm.rMethod = ''
-        this.resourceForm.isable = ''
-        this.resourceForm.remark = ''
+        this.resourceDialogTitle = '新增资源'
+        this.$nextTick(function () {
+          this.$refs['resourceForm'].resetFields()
+          this.resourceForm.id = null
+          this.resourceForm.rTitle = ''
+          this.resourceForm.rUrl = ''
+//        this.resourceForm.rClass = 'com.shine.admin.controller'
+          this.resourceForm.rClass = ''
+          this.resourceForm.rMethod = ''
+          this.resourceForm.isable = '1'
+          this.resourceForm.remark = ''
+        })
       },
       updateResource (row) {
-        this.resourceDialogTitle = '修改资源'
         this.resourceDialogVisible = true
-        this.resourceForm.id = row.id
-        this.resourceForm.rTitle = row.rTitle
-        this.resourceForm.rUrl = row.rUrl
-        this.resourceForm.rClass = row.rClass
-        this.resourceForm.rMethod = row.rMethod
-        this.resourceForm.isable = row.isable
-        this.resourceForm.remark = row.remark
+        this.resourceDialogTitle = '修改资源'
+        this.$nextTick(function () {
+          this.$refs['resourceForm'].resetFields()
+          this.resourceForm.id = row.id
+          this.resourceForm.rTitle = row.rTitle
+          this.resourceForm.rUrl = row.rUrl
+          this.resourceForm.rClass = row.rClass
+          this.resourceForm.rMethod = row.rMethod
+          this.resourceForm.isable = row.isable
+          this.resourceForm.remark = row.remark
+        })
       },
       saveResource () {
         let me = this
-        api.saveResource(this.resourceForm, function (data) {
-          me.resourceDialogVisible = false
-          me.fetchData()
+        this.$refs['resourceForm'].validate((valid) => {
+          if (valid) {
+            api.saveResource(this.resourceForm, function (data) {
+              me.resourceDialogVisible = false
+              me.fetchData()
+            })
+          } else {
+            return false
+          }
         })
       },
       delResource (id) {

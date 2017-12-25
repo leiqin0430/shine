@@ -10,11 +10,11 @@
       </el-form-item>
     </el-form>
     <el-table :data="tableData" height="'auto'" size="small" border stripe style="height: calc((100% - 51px) - 32px)">
-      <el-table-column prop="rName" label="角色名称" width="180" header-align="center">
+      <el-table-column prop="rName" label="角色名称" width="200" header-align="center">
       </el-table-column>
       <el-table-column prop="rEname" label="英文名称" width="180" header-align="center">
       </el-table-column>
-      <el-table-column prop="type" label="角色类型" width="120" header-align="center">
+      <el-table-column prop="type" label="角色类型" width="140" header-align="center">
       </el-table-column>
       <el-table-column prop="dataRange" label="数据范围" width="180" header-align="center">
       </el-table-column>
@@ -79,14 +79,14 @@
     </el-pagination>
     <!--角色dialog-->
     <el-dialog :title="roleDialogTitle" :visible.sync="roleDialogVisible" :close-on-click-modal="false">
-      <el-form :model="roleForm" :label-width="formLabelWidth">
-        <el-form-item label="角色名称">
-          <el-input v-model="roleForm.rName" auto-complete="off"></el-input>
+      <el-form :model="roleForm" :rules="roleRules" ref="roleForm" label-width="100px">
+        <el-form-item label="角色名称" prop="rName">
+          <el-input v-model="roleForm.rName"></el-input>
         </el-form-item>
-        <el-form-item label="英文名称">
-          <el-input v-model="roleForm.rEname" auto-complete="off"></el-input>
+        <el-form-item label="英文名称" prop="rEname">
+          <el-input v-model="roleForm.rEname"></el-input>
         </el-form-item>
-        <el-form-item label="角色类型">
+        <el-form-item label="角色类型" prop="rType">
           <el-select v-model="roleForm.rType" placeholder="请选择">
             <el-option
               v-for="item in dictOptions.roleType"
@@ -96,7 +96,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="是否可用">
+        <el-form-item label="是否可用" prop="isable">
           <el-select v-model="roleForm.isable" placeholder="请选择">
             <el-option
               v-for="item in dictOptions.sf"
@@ -106,7 +106,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="数据范围">
+        <el-form-item label="数据范围" prop="rDataRange">
           <el-select v-model="roleForm.rDataRange" placeholder="请选择">
             <el-option
               v-for="item in dictOptions.dataRange"
@@ -116,7 +116,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="roleForm.remark" type="textarea" :rows="2" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
@@ -143,17 +143,20 @@
     </el-dialog>
     <!--资源权限dialog-->
     <el-dialog title="资源权限" :visible.sync="resourceAuthDialogVisible" :close-on-click-modal="false">
-      <el-table :data="resourceData" height="400" size="small" border stripe ref="resTable">
+      <el-table :data="resourceData" height="400" size="small" border stripe ref="resTable" @select="selectRes" @select-all="selectAllRes" @selection-change="selectChange">
         <el-table-column type="selection" width="55" header-align="center" align="center"></el-table-column>
-        <el-table-column prop="rTitle" label="资源名称" width="100" header-align="center">
+        <el-table-column prop="rTitle" label="资源名称" width="140" header-align="center">
         </el-table-column>
-        <el-table-column prop="rUrl" label="资源地址" width="100" header-align="center" show-overflow-tooltip>
+        <el-table-column prop="rUrl" label="资源地址" width="140" header-align="center">
         </el-table-column>
-        <el-table-column prop="rClass" label="类名" width="100" header-align="center">
+        <el-table-column prop="rClass" label="类名" width="160" header-align="center">
         </el-table-column>
-        <el-table-column prop="rMethod" label="方法名" width="100" header-align="center">
+        <el-table-column prop="rMethod" label="方法名" width="120" header-align="center">
         </el-table-column>
-        <el-table-column prop="isable" label="是否可用" width="100" header-align="center" align="center">
+        <el-table-column prop="isable" label="是否可用" width="70" header-align="center" align="center">
+          <template slot-scope="scope">
+            <span v-for="item in dictOptions.sf" v-if="item.dCode === scope.row.isable">{{item.dTitle}}</span>
+          </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" header-align="center" show-overflow-tooltip>
         </el-table-column>
@@ -175,7 +178,7 @@
   </section>
 </template>
 <script>
-  import common from '../../utils/common'
+  //  import common from '../../utils/common'
   import api from '../../api/settings/role'
   import menuApi from '../../api/settings/menu'
   import resApi from '../../api/settings/resource'
@@ -190,9 +193,9 @@
           pageSize: 10
         },
         dictOptions: {
-          sf: [],
-          roleType: [],
-          dataRange: []
+          sf: this.$store.state.dictList.filter(o => o.dClassify === 'SF'),
+          roleType: this.$store.state.dictList.filter(o => o.dClassify === 'ROLE_TYPE'),
+          dataRange: this.$store.state.dictList.filter(o => o.dClassify === 'DATA_RANGE')
         },
         roleForm: {
           id: null,
@@ -203,10 +206,35 @@
           isable: '',
           remark: ''
         },
+        roleRules: {
+          rName: [
+            { required: true, message: '请输入角色名称' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          rEname: [
+            { required: true, message: '请输入英文名称' },
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符' }
+          ],
+          rType: [
+            { required: true, message: '请选择角色类型', trigger: 'change' }
+          ],
+          rDataRange: [
+            { required: true, message: '请选择数据范围', trigger: 'change' }
+          ],
+          isable: [
+            { required: true, message: '请选择是否可用', trigger: 'change' }
+          ],
+          remark: [
+            { min: 1, max: 40, message: '长度在 1 到 40 个字符' }
+          ]
+        },
         roleDialogVisible: false,
         roleDialogTitle: '',
-        formLabelWidth: '100px',
         treeData: [],
+        menuNodeObj: {
+          nodeIds: [],
+          leafNodeIds: []
+        },
         defaultProps: {
           children: 'children',
           label: 'label'
@@ -226,18 +254,7 @@
       }
     },
     created () {
-      let me = this
       this.fetchData()
-      // 获取下拉字典：是否可用、角色类型、数据范围
-      common.getDictList({dClassify: 'SF'}, function (data) {
-        me.dictOptions.sf = data.page.rows
-      })
-      common.getDictList({dClassify: 'ROLE_TYPE'}, function (data) {
-        me.dictOptions.roleType = data.page.rows
-      })
-      common.getDictList({dClassify: 'DATA_RANGE'}, function (data) {
-        me.dictOptions.dataRange = data.page.rows
-      })
     },
     methods: {
       getRoleList () {
@@ -259,32 +276,44 @@
         this.fetchData()
       },
       addRole () {
-        this.roleDialogTitle = '新增角色'
         this.roleDialogVisible = true
-        this.roleForm.id = null
-        this.roleForm.rName = ''
-        this.roleForm.rEname = ''
-        this.roleForm.rType = ''
-        this.roleForm.rDataRange = ''
-        this.roleForm.isable = ''
-        this.roleForm.remark = ''
+        this.roleDialogTitle = '新增角色'
+        this.$nextTick(function () {
+          this.$refs['roleForm'].resetFields()
+          this.roleForm.id = null
+          this.roleForm.rName = ''
+          this.roleForm.rEname = ''
+          this.roleForm.rType = ''
+          this.roleForm.rDataRange = ''
+          this.roleForm.isable = ''
+          this.roleForm.remark = ''
+        })
       },
       updateRole (row) {
-        this.roleDialogTitle = '修改角色'
         this.roleDialogVisible = true
-        this.roleForm.id = row.id
-        this.roleForm.rName = row.rName
-        this.roleForm.rEname = row.rEname
-        this.roleForm.rType = row.rType
-        this.roleForm.rDataRange = row.rDataRange
-        this.roleForm.isable = row.isable
-        this.roleForm.remark = row.remark
+        this.roleDialogTitle = '修改角色'
+        this.$nextTick(function () {
+          this.$refs['roleForm'].resetFields()
+          this.roleForm.id = row.id
+          this.roleForm.rName = row.rName
+          this.roleForm.rEname = row.rEname
+          this.roleForm.rType = row.rType
+          this.roleForm.rDataRange = row.rDataRange
+          this.roleForm.isable = row.isable
+          this.roleForm.remark = row.remark
+        })
       },
       saveRole () {
         let me = this
-        api.saveRole(this.roleForm, function (data) {
-          me.roleDialogVisible = false
-          me.fetchData()
+        this.$refs['roleForm'].validate((valid) => {
+          if (valid) {
+            api.saveRole(this.roleForm, function (data) {
+              me.roleDialogVisible = false
+              me.fetchData()
+            })
+          } else {
+            return false
+          }
         })
       },
       delRole (id) {
@@ -312,16 +341,56 @@
           me.treeData = data.list
           // 获取角色菜单权限列表
           api.getRoleMenuAuth({rid: id}, function (data) {
-            me.$refs.menuTree.setCheckedKeys(data.list)
+            // 清空数组
+            me.menuNodeObj.leafNodeIds = []
+            // 获取树中所有叶子节点
+            me.findLeafNodeIds(me.treeData)
+            let set1 = new Set(me.menuNodeObj.leafNodeIds)
+            let set2 = new Set(data.list)
+            // 取交集
+            let intersect = new Set([...set1].filter(x => set2.has(x)))
+            me.$refs.menuTree.setCheckedKeys(Array.from(intersect))
           })
         })
         this.menuAuthDialogVisible = true
       },
+      findLeafNodeIds (arr) {
+        arr.forEach(node => {
+          if (node.children.length === 0) {
+            this.menuNodeObj.leafNodeIds.push(node.id)
+          } else {
+            this.findLeafNodeIds(node.children)
+          }
+        })
+      },
       saveMenuAuth () {
         let me = this
-        api.saveRoleMenuAuth({id: this.currentRoleId, ids: this.$refs.menuTree.getCheckedKeys()}, function (data) {
+        let checkedKeys = this.$refs.menuTree.getCheckedKeys()
+        // 清空数组
+        this.menuNodeObj.nodeIds = []
+        checkedKeys.forEach(id => {
+          this.treeData.forEach(node => {
+            this.findNodeId(node, id)
+          })
+        })
+        api.saveRoleMenuAuth({id: this.currentRoleId, ids: Array.from(new Set(this.menuNodeObj.nodeIds))}, function (data) {
           me.menuAuthDialogVisible = false
         })
+      },
+      findNodeId (node, id) {
+        if (node.id === id) {
+          this.menuNodeObj.nodeIds.push(id)
+          return true
+        }
+        if (node.children.length > 0) {
+          node.children.forEach(n => {
+            if (this.findNodeId(n, id)) {
+              this.menuNodeObj.nodeIds.push(node.id)
+              return true
+            }
+          })
+        }
+        return false
       },
       openResourceAuthDialog (id) {
         this.currentRoleId = id
@@ -346,11 +415,7 @@
       },
       saveResourceAuth () {
         let me = this
-        let resIds = []
-        this.$refs.resTable.selection.forEach(row => {
-          resIds.push(row.id)
-        })
-        api.saveRoleResAuth({id: this.currentRoleId, ids: resIds}, function (data) {
+        api.saveRoleResAuth({id: this.currentRoleId, ids: this.roleResAuthIds}, function (data) {
           me.resourceAuthDialogVisible = false
         })
       },
@@ -369,14 +434,45 @@
           me.resourceData = data.page.rows
           me.resourceDataTotal = data.page.total
           // 回显角色资源权限
-          me.resourceData.forEach(row => {
-            me.roleResAuthIds.forEach(id => {
-              if (row.id === id) {
-                me.$refs.resTable.toggleRowSelection(row)
-              }
+          me.$nextTick(function () {
+            me.resourceData.forEach(row => {
+              me.roleResAuthIds.forEach(id => {
+                if (row.id === id) {
+                  me.$refs.resTable.toggleRowSelection(row)
+                }
+              })
             })
           })
         })
+      },
+      selectRes (selection, row) {
+        let index = this.roleResAuthIds.findIndex(id => id === row.id)
+        if (index !== -1) {
+          this.roleResAuthIds.splice(index, 1)
+        } else {
+          this.roleResAuthIds.push(row.id)
+        }
+      },
+      selectAllRes (selection) {
+        // 全部选中
+        if (selection.length > 0) {
+          selection.forEach(row => {
+            let index = this.roleResAuthIds.findIndex(id => id === row.id)
+            if (index === -1) {
+              this.roleResAuthIds.push(row.id)
+            }
+          })
+        } else { // 全部取消选中
+          this.resourceData.forEach(row => {
+            let index = this.roleResAuthIds.findIndex(id => id === row.id)
+            if (index !== -1) {
+              this.roleResAuthIds.splice(index, 1)
+            }
+          })
+        }
+      },
+      selectChange (selection) {
+//        console.log('change')
       }
     }
   }
