@@ -20,7 +20,8 @@
 </template>
 
 <script>
-  import { login } from '../api/login'
+//  import { login } from '../api/login'
+  import { login } from '../mockApi/login'
   export default {
     name: 'login',
     data () {
@@ -47,14 +48,20 @@
         this.$refs[formName].validate((valid) => {
           if (valid) {
             let params = {'username': this.loginForm.account, 'password': this.loginForm.pass}
-            login(params, function (data) {
+//            login(params, function (data) {
+//              me.loadingFlag = false
+//              localStorage.setItem('shine_user', JSON.stringify(data.obj))
+//              me.$store.commit('setToken', data.obj.token)
+//              me.$router.push({ path: '/' })
+//            }, function (data) {
+//              me.loadingFlag = false
+//              me.$message.info(data.resultInfo)
+//            })
+            login(params).then(function (data) {
               me.loadingFlag = false
-              localStorage.setItem('shine_user', JSON.stringify(data.obj))
-              me.$store.commit('setToken', data.obj.token)
+              localStorage.setItem('shine_user', JSON.stringify(data.user))
+              me.$store.commit('setToken', data.user.token)
               me.$router.push({ path: '/' })
-            }, function (data) {
-              me.loadingFlag = false
-              me.$message.info(data.resultInfo)
             })
           } else {
             this.loadingFlag = false

@@ -9,12 +9,12 @@ export default {
   bootstrap () {
     let mock = new MockAdapter(axios)
     mock.onPost('/log/in').reply(cfg => {
-      let {accountNo, password} = JSON.parse(cfg.data)
+      let {username, password} = JSON.parse(cfg.data)
       return new Promise((resolve, reject) => {
         let user = null
         setTimeout(() => {
           let hasUser = loginUser.some(u => {
-            if (u.accountNo === accountNo && u.password === password) {
+            if (u.username === username && u.password === password) {
               user = JSON.parse(JSON.stringify(u))
               user.password = undefined
               return true

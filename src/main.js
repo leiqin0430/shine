@@ -8,9 +8,9 @@ import App from './App'
 import router from './router/index'
 import store from './vuex/index'
 import 'font-awesome/css/font-awesome.min.css'
-// import Mock from './mock/index'
-//
-// Mock.bootstrap()
+import Mock from './mock/index'
+
+Mock.bootstrap()
 
 Vue.config.productionTip = false
 

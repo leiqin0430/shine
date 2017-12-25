@@ -6,9 +6,10 @@ import Mock from 'mockjs'
 const loginUser = [
   {
     id: 1,
-    accountNo: 'admin',
+    username: 'admin',
     password: 'a',
-    name: '雷芹'
+    name: '雷芹',
+    token: 'token1234'
   }
 ]
 
